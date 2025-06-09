@@ -10,22 +10,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
         body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-        .card { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: none; }
-        .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); border: none; transition: all 0.3s ease; }
-        .btn-primary:hover { background: linear-gradient(45deg, #5a6fd8, #6a4190); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .card { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); border: none; }
+        .btn-primary:hover { background: linear-gradient(45deg, #5a6fd8, #6a4190); }
         .page { display: none; }
         .page.active { display: block; }
         #qr-canvas { margin: 20px auto; display: block; }
         .navbar { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        
-        /* CẢI TIỆN GIAO DIỆN: CSS cho form đăng ký mới */
-        #register .card-body { background-color: #f8f9fa; }
-        .form-floating > .form-control { height: calc(3.5rem + 2px); line-height: 1.25; }
-        .form-floating > label { padding: 1rem .75rem; }
-        .form-control:focus {
-            border-color: #764ba2;
-            box-shadow: 0 0 0 0.25rem rgba(118, 75, 162, 0.25);
-        }
     </style>
 </head>
 <body>
@@ -35,45 +26,41 @@
             <span class="navbar-brand"><i class="fas fa-calendar-check"></i> Hội Thảo Check-in</span>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="javascript:void(0)" onclick="showPage('register')">Đăng Ký</a>
-                <a class="nav-link" href="javascript:void(0)" onclick="initiateScanPage()">Quét QR</a>
+                <a class="nav-link" href="javascript:void(0)" onclick="showPage('scan')">Quét QR</a>
                 <a class="nav-link" href="javascript:void(0)" onclick="showPage('admin')">Admin</a>
             </div>
         </div>
     </nav>
-
-    <!-- Notification Container (Toast) -->
-    <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1100"></div>
 
     <div class="container mt-4">
         <!-- Trang Đăng Ký -->
         <div id="register" class="page active">
             <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <div class="card overflow-hidden">
+                    <div class="card">
                         <div class="card-header bg-primary text-white text-center">
                             <h4><i class="fas fa-user-plus"></i> Đăng Ký Tham Dự</h4>
                         </div>
-                        <div class="card-body p-4">
+                        <div class="card-body">
                             <form id="registerForm">
-                                <!-- GIAO DIỆN MỚI: Dùng Floating Labels và thêm Icon -->
-                                <div class="form-floating mb-4">
-                                    <input type="text" class="form-control" id="name" placeholder="Họ và Tên" required>
-                                    <label for="name"><i class="fas fa-user me-2"></i>Họ và Tên *</label>
+                                <div class="mb-3">
+                                    <label class="form-label">Họ và Tên *</label>
+                                    <input type="text" class="form-control" id="name" required>
                                 </div>
-                                <div class="form-floating mb-4">
-                                    <input type="tel" class="form-control" id="phone" placeholder="Số Điện Thoại" required>
-                                    <label for="phone"><i class="fas fa-phone me-2"></i>Số Điện Thoại *</label>
+                                <div class="mb-3">
+                                    <label class="form-label">Số Điện Thoại *</label>
+                                    <input type="tel" class="form-control" id="phone" required>
                                 </div>
-                                <div class="form-floating mb-4">
-                                    <input type="email" class="form-control" id="email" placeholder="Email">
-                                    <label for="email"><i class="fas fa-envelope me-2"></i>Email</label>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email">
                                 </div>
-                                <div class="form-floating mb-3">
-                                    <input type="text" class="form-control" id="company" placeholder="Công Ty/Tổ Chức">
-                                    <label for="company"><i class="fas fa-building me-2"></i>Công Ty/Tổ Chức</label>
+                                <div class="mb-3">
+                                    <label class="form-label">Công Ty/Tổ Chức</label>
+                                    <input type="text" class="form-control" id="company">
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 py-3 mt-3">
-                                    <i class="fas fa-paper-plane"></i> ĐĂNG KÍ
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-paper-plane"></i> Đăng Ký
                                 </button>
                             </form>
                         </div>
@@ -133,7 +120,7 @@
                         </div>
                         <div class="card-body text-center">
                             <div id="checkinInfo"></div>
-                            <button class="btn btn-primary mt-3" onclick="initiateScanPage()">
+                            <button class="btn btn-primary mt-3" onclick="showPage('scan')">
                                 <i class="fas fa-qrcode"></i> Quét Tiếp
                             </button>
                         </div>
@@ -214,235 +201,265 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Supabase Configuration
         const SUPABASE_URL = 'https://daavpmtwlarsmwyhjxeg.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhYXZwbXR3bGFyc213eWhqeGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMzE4ODIsImV4cCI6MjA2NDYwNzg4Mn0.mGu2KMRzAOg2L7h4AU8eFaZlzJLD57W5vsGd_eGDeFk';
+        
+        // Initialize Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const checkinSound = new Audio('https://cdn.freesound.org/previews/253/253177_4486188-lq.mp3');
+        
+        let participants = [];
         let currentUser = null;
         let html5QrcodeScanner = null;
 
-        function showNotification(message, type = 'info') {
-            const container = document.getElementById('notification-container');
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
-            toast.role = 'alert';
-            toast.ariaLive = 'assertive';
-            toast.ariaAtomic = 'true';
-            toast.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                const bsToast = new bootstrap.Toast(toast, { autohide: true });
-                bsToast.hide();
-                setTimeout(() => toast.remove(), 500);
-            }, 5000);
-        }
-
-        function initiateScanPage() {
-            checkinSound.play().catch(e => {});
-            checkinSound.pause();
-            checkinSound.currentTime = 0;
-            showPage('scan');
-        }
-
+        // Navigation
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
+            
             if (pageId === 'scan') {
                 startQRScanner();
-            } else if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) {
-                 html5QrcodeScanner.clear().catch(err => console.error("Failed to clear scanner:", err));
+            } else if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
             }
+            
             if (pageId === 'admin') {
                 loadAdminData();
             }
         }
 
+        // Registration
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            
             try {
-                const registrationPayload = { name: document.getElementById('name').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value || null, company: document.getElementById('company').value || null, registered_at: new Date().toISOString(), checked_in: false, checkin_time: null };
-                const { data: insertedData, error } = await supabase.from('attendees').insert([registrationPayload]).select();
-                if (error) throw error;
-                if (!insertedData || insertedData.length === 0) throw new Error("Không nhận được dữ liệu sau khi đăng ký.");
-                currentUser = insertedData[0];
-                showNotification('Đăng ký thành công!', 'success');
-                generateQR(currentUser);
-                showSuccessPage(currentUser);
+                const registrationPayload = {
+                    name: document.getElementById('name').value, // Map to 'name' column in Supabase, ID changed for consistency
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value || null,
+                    company: document.getElementById('company').value || null,
+                    registered_at: new Date().toISOString(),
+                    checked_in: false,
+                    checkin_time: null
+                };
+                
+                // Save to Supabase
+                const { data: insertedData, error } = await supabase
+                    .from('attendees') // Correct table name
+                    .insert([registrationPayload])
+                    .select(); // Returns an array of inserted records
+                
+                if (error) {
+                    throw error; // The error from Supabase will be caught below
+                }
+
+                if (!insertedData || insertedData.length === 0) {
+                    throw new Error("Không nhận được dữ liệu xác nhận sau khi đăng ký. Vui lòng thử lại.");
+                }
+
+                const newAttendee = insertedData[0]; // Get the successfully inserted record with its server-generated ID
+
+                currentUser = newAttendee; // Store the attendee data with the correct ID
+                generateQR(newAttendee);   // Use data with correct ID for QR
+                showSuccessPage(newAttendee); // Use data with correct ID for success page
+                
+                // Reset form
                 this.reset();
+                
             } catch (error) {
-                console.error('Registration Error:', error);
-                showNotification(`Lỗi đăng ký: ${error.message}`, 'danger');
+                console.error('Registration Error:', error); // More descriptive console log
+                alert('Lỗi đăng ký: ' + (error && error.message ? error.message : JSON.stringify(error)));
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> TẠO MÃ QR';
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Đăng Ký';
             }
         });
 
         function generateQR(userData) {
             const canvas = document.getElementById('qr-canvas');
-            const qrData = JSON.stringify({ id: userData.id, name: userData.name, phone: userData.phone });
-            QRCode.toCanvas(canvas, qrData, { width: 200, height: 200 });
+            const qrData = JSON.stringify({
+                id: userData.id,
+                name: userData.name, // Use .name consistent with Supabase column
+                phone: userData.phone
+            });
+            
+            QRCode.toCanvas(canvas, qrData, {
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff'
+            });
         }
 
         function showSuccessPage(userData) {
-            document.getElementById('userInfo').innerHTML = `<strong>Mã ID:</strong> ${userData.id}<br><strong>Họ Tên:</strong> ${userData.name}<br><strong>Điện Thoại:</strong> ${userData.phone}`;
+            document.getElementById('userInfo').innerHTML = `
+                <strong>Mã ID:</strong> ${userData.id}<br>
+                <strong>Họ Tên:</strong> ${userData.name}<br> <!-- Use .name consistent with Supabase column -->
+                <strong>Điện Thoại:</strong> ${userData.phone}
+            `;
             showPage('success');
         }
 
         function downloadQR() {
             const canvas = document.getElementById('qr-canvas');
             const link = document.createElement('a');
-            link.download = `QR_${currentUser.name.replace(/\s/g, '_')}_${currentUser.id}.png`;
+            link.download = `QR_${currentUser.id}.png`;
             link.href = canvas.toDataURL();
             link.click();
         }
 
+        // QR Scanner
         function startQRScanner() {
-            if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) return;
-            html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: { width: 250, height: 250 } });
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+            
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader", 
+                { fps: 10, qrbox: 250 }
+            );
+            
             html5QrcodeScanner.render(onScanSuccess, onScanError);
         }
 
-        function resetScanView() {
-    document.getElementById('scan-result').innerHTML = '';
-    if (html5QrcodeScanner) {
-        // Xóa hoàn toàn trình quét cũ và giao diện của nó
-        html5QrcodeScanner.clear()
-            .then(() => {
-                // Sau khi xóa thành công, tạo lại một trình quét mới
-                startQRScanner();
-            })
-            .catch(error => {
-                console.error("Lỗi khi xóa trình quét, sẽ thử tạo lại.", error);
-                startQRScanner(); // Vẫn cố gắng tạo lại dù có lỗi
-            });
-    }
-}
-
         function onScanSuccess(decodedText, decodedResult) {
-            if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) { 
-                html5QrcodeScanner.pause(true);
-            }
             try {
                 const qrData = JSON.parse(decodedText);
-                if (!qrData.id || !qrData.name) throw new Error("Mã QR không hợp lệ.");
                 processCheckin(qrData);
             } catch (error) {
-                const errorMessage = error ? (error.message || JSON.stringify(error)) : 'Lỗi không xác định';
-                document.getElementById('scan-result').innerHTML = `
-                    <div class="alert alert-danger">${errorMessage}</div>
-                    <button class="btn btn-info mt-2" onclick="resetScanView()">
-                        <i class="fas fa-qrcode"></i> Quét Lại
-                    </button>
-                `;
+                document.getElementById('scan-result').innerHTML = 
+                    '<div class="alert alert-danger">Mã QR không hợp lệ!</div>';
             }
         }
 
-        function onScanError(error) { /* Ignore */ }
+        function onScanError(error) {
+            // Ignore scan errors
+        }
 
         async function processCheckin(qrData) {
-            let isCheckinFlowFinished = false;
-            const scanResultDiv = document.getElementById('scan-result');
-
             try {
+                // Tìm participant trong Supabase
                 const { data: participant, error } = await supabase
-                    .from('attendees')
+                    .from('attendees') // Correct table name
                     .select('*')
                     .eq('id', qrData.id)
                     .single();
                 
                 if (error || !participant) {
-                    scanResultDiv.innerHTML = `
-                        <div class="alert alert-danger">Không tìm thấy thông tin đăng ký!</div>
-                        <button class="btn btn-info mt-2" onclick="resetScanView()">
-                            <i class="fas fa-qrcode"></i> Quét Lại
-                        </button>
-                    `;
+                    document.getElementById('scan-result').innerHTML = 
+                        '<div class="alert alert-danger">Không tìm thấy thông tin đăng ký!</div>';
                     return;
                 }
                 
                 if (participant.checked_in) {
-                    scanResultDiv.innerHTML = `
-                        <div class="alert alert-warning">
-                            <strong>${participant.name}</strong> đã check-in trước đó!<br>
+                    document.getElementById('scan-result').innerHTML = 
+                        `<div class="alert alert-warning">
+                            <strong>${participant.name}</strong> đã check-in trước đó!<br> <!-- Use .name -->
                             Thời gian: ${new Date(participant.checkin_time).toLocaleString('vi-VN')}
-                        </div>
-                        <button class="btn btn-info mt-2" onclick="resetScanView()">
-                            <i class="fas fa-qrcode"></i> Quét Lại
-                        </button>
-                    `;
+                        </div>`;
                     return;
                 }
                 
+                // Update check-in status
                 const { error: updateError } = await supabase
-                    .from('attendees')
-                    .update({ checked_in: true, checkin_time: new Date().toISOString() })
+                    .from('attendees') // Correct table name
+                    .update({ 
+                        checked_in: true, 
+                        checkin_time: new Date().toISOString() 
+                    })
                     .eq('id', qrData.id);
                 
-                if (updateError) throw updateError;
+                if (updateError) {
+                    throw updateError;
+                }
                 
-                checkinSound.play();
-                isCheckinFlowFinished = true;
-
-                document.getElementById('checkinInfo').innerHTML = 
-                    `<div class="alert alert-success">
-                        <h5><i class="fas fa-user-check"></i> ${participant.name}</h5>
+                // Show success
+                document.getElementById('checkinInfo').innerHTML = `
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-user-check"></i> ${participant.name}</h5> <!-- Use .name -->
                         <p><strong>Điện thoại:</strong> ${participant.phone}</p>
                         <p><strong>Thời gian:</strong> ${new Date().toLocaleString('vi-VN')}</p>
-                    </div>`;
+                    </div>
+                `;
                 
-                if (html5QrcodeScanner) html5QrcodeScanner.clear().catch(err => {});
+                if (html5QrcodeScanner) {
+                    html5QrcodeScanner.clear();
+                }
                 
                 showPage('checkin-success');
-
+                
             } catch (error) {
                 console.error('Check-in error:', error);
-                const errorMessage = error ? (error.message || JSON.stringify(error)) : 'Lỗi không xác định';
-                scanResultDiv.innerHTML = `
-                    <div class="alert alert-danger">Lỗi khi check-in: ${errorMessage}</div>
-                    <button class="btn btn-info mt-2" onclick="resetScanView()">
-                        <i class="fas fa-qrcode"></i> Quét Lại
-                    </button>
-                `;
+                document.getElementById('scan-result').innerHTML = 
+                    '<div class="alert alert-danger">Lỗi khi check-in: ' + (error && error.message ? error.message : JSON.stringify(error)) + '</div>';
             }
         }
 
+        // Admin Panel
         function adminLogin() {
             const password = document.getElementById('adminPassword').value;
-            if (password === 'admin123') {
+            if (password === 'admin123') { // Đổi mật khẩu mạnh hơn
                 document.getElementById('admin-login').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'block';
                 loadAdminData();
             } else {
-                showNotification('Mật khẩu không đúng!', 'warning');
+                alert('Mật khẩu không đúng!');
             }
         }
 
         async function loadAdminData() {
             try {
-                const { data: participants, error } = await supabase.from('attendees').select('*').order('registered_at', { ascending: false });
-                if (error) throw error;
+                const { data: participants, error } = await supabase
+                    .from('attendees') // Correct table name
+                    .select('*')
+                    .order('registered_at', { ascending: false }); // Assuming 'registered_at' column exists
+                
+                if (error) {
+                    throw error;
+                }
+                
                 const total = participants.length;
                 const checkedIn = participants.filter(p => p.checked_in).length;
+                const pending = total - checkedIn;
+                
                 document.getElementById('totalRegistered').textContent = total;
                 document.getElementById('totalCheckedIn').textContent = checkedIn;
-                document.getElementById('totalPending').textContent = total - checkedIn;
+                document.getElementById('totalPending').textContent = pending;
+                
                 const tbody = document.getElementById('participantsList');
                 tbody.innerHTML = '';
-                participants.forEach((p, index) => {
+                
+                participants.forEach((participant, index) => {
                     const row = tbody.insertRow();
-                    row.innerHTML = `<td>${index + 1}</td><td>${p.name}</td><td>${p.phone}</td><td>${p.email || 'N/A'}</td><td>${p.company || 'N/A'}</td><td><span class="badge ${p.checked_in ? 'bg-success' : 'bg-secondary'}">${p.checked_in ? 'Đã Check-in' : 'Chưa Check-in'}</span></td><td>${p.checkin_time ? new Date(p.checkin_time).toLocaleString('vi-VN') : 'N/A'}</td>`;
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${participant.name}</td> <!-- Use .name -->
+                        <td>${participant.phone}</td>
+                        <td>${participant.email || 'N/A'}</td>
+                        <td>${participant.company || 'N/A'}</td>
+                        <td>
+                            <span class="badge ${participant.checked_in ? 'bg-success' : 'bg-secondary'}">
+                                ${participant.checked_in ? 'Đã Check-in' : 'Chưa Check-in'}
+                            </span>
+                        </td>
+                        <td>${participant.checkin_time ? new Date(participant.checkin_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                    `;
                 });
+                
             } catch (error) {
                 console.error('Load admin data error:', error);
-                showNotification(`Lỗi tải dữ liệu admin: ${error.message}`, 'danger');
+                alert('Lỗi tải dữ liệu: ' + (error && error.message ? error.message : JSON.stringify(error)));
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => showPage('register'));
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('register');
+        });
     </script>
 </body>
 </html>
