@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Check-in Hội Thảo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .card { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); border: none; }
+        .btn-primary:hover { background: linear-gradient(45deg, #5a6fd8, #6a4190); }
+        .page { display: none; }
+        .page.active { display: block; }
+        #qr-canvas { margin: 20px auto; display: block; }
+        .navbar { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <span class="navbar-brand"><i class="fas fa-calendar-check"></i> Hội Thảo Check-in</span>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="javascript:void(0)" onclick="showPage('register')">Đăng Ký</a>
+                <a class="nav-link" href="javascript:void(0)" onclick="showPage('scan')">Quét QR</a>
+                <a class="nav-link" href="javascript:void(0)" onclick="showPage('admin')">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Trang Đăng Ký -->
+        <div id="register" class="page active">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h4><i class="fas fa-user-plus"></i> Đăng Ký Tham Dự</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="registerForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Họ và Tên *</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Số Điện Thoại *</label>
+                                    <input type="tel" class="form-control" id="phone" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Công Ty/Tổ Chức</label>
+                                    <input type="text" class="form-control" id="company">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-paper-plane"></i> Đăng Ký
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trang Thành Công với QR -->
+        <div id="success" class="page">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h4><i class="fas fa-check-circle"></i> Đăng Ký Thành Công!</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:</p>
+                            <canvas id="qr-canvas"></canvas>
+                            <div id="userInfo" class="mt-3 p-3 bg-light rounded"></div>
+                            <button class="btn btn-primary mt-3" onclick="downloadQR()">
+                                <i class="fas fa-download"></i> Tải QR Code
+                            </button>
+                            <button class="btn btn-outline-primary mt-3 ms-2" onclick="showPage('register')">
+                                <i class="fas fa-plus"></i> Đăng Ký Mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trang Quét QR -->
+        <div id="scan" class="page">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-info text-white text-center">
+                            <h4><i class="fas fa-qrcode"></i> Quét Mã QR Check-in</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <div id="qr-reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
+                            <div id="scan-result" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trang Check-in Thành Công -->
+        <div id="checkin-success" class="page">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h4><i class="fas fa-check-double"></i> Check-in Thành Công!</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <div id="checkinInfo"></div>
+                            <button class="btn btn-primary mt-3" onclick="showPage('scan')">
+                                <i class="fas fa-qrcode"></i> Quét Tiếp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trang Admin -->
+        <div id="admin" class="page">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h4><i class="fas fa-shield-alt"></i> Quản Trị Viên</h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="admin-login" class="text-center">
+                                <input type="password" class="form-control mb-3 w-50 mx-auto" 
+                                       id="adminPassword" placeholder="Mật khẩu admin">
+                                <button class="btn btn-warning" onclick="adminLogin()">
+                                    <i class="fas fa-sign-in-alt"></i> Đăng Nhập
+                                </button>
+                            </div>
+                            <div id="admin-panel" style="display: none;">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <div class="card bg-primary text-white">
+                                            <div class="card-body text-center">
+                                                <h3 id="totalRegistered">0</h3>
+                                                <p>Tổng Đăng Ký</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-success text-white">
+                                            <div class="card-body text-center">
+                                                <h3 id="totalCheckedIn">0</h3>
+                                                <p>Đã Check-in</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-info text-white">
+                                            <div class="card-body text-center">
+                                                <h3 id="totalPending">0</h3>
+                                                <p>Chưa Check-in</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Họ Tên</th>
+                                                <th>Điện Thoại</th>
+                                                <th>Email</th>
+                                                <th>Công Ty</th>
+                                                <th>Trạng Thái</th>
+                                                <th>Thời Gian Check-in</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="participantsList">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://daavpmtwlarsmwyhjxeg.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhYXZwbXR3bGFyc213eWhqeGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMzE4ODIsImV4cCI6MjA2NDYwNzg4Mn0.mGu2KMRzAOg2L7h4AU8eFaZlzJLD57W5vsGd_eGDeFk';
+        
+        // Initialize Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let participants = [];
+        let currentUser = null;
+        let html5QrcodeScanner = null;
+
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            if (pageId === 'scan') {
+                startQRScanner();
+            } else if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+            
+            if (pageId === 'admin') {
+                loadAdminData();
+            }
+        }
+
+        // Registration
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            
+            try {
+                const registrationPayload = {
+                    name: document.getElementById('name').value, // Map to 'name' column in Supabase, ID changed for consistency
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value || null,
+                    company: document.getElementById('company').value || null,
+                    registered_at: new Date().toISOString(),
+                    checked_in: false,
+                    checkin_time: null
+                };
+                
+                // Save to Supabase
+                const { data: insertedData, error } = await supabase
+                    .from('attendees') // Correct table name
+                    .insert([registrationPayload])
+                    .select(); // Returns an array of inserted records
+                
+                if (error) {
+                    throw error; // The error from Supabase will be caught below
+                }
+
+                if (!insertedData || insertedData.length === 0) {
+                    throw new Error("Không nhận được dữ liệu xác nhận sau khi đăng ký. Vui lòng thử lại.");
+                }
+
+                const newAttendee = insertedData[0]; // Get the successfully inserted record with its server-generated ID
+
+                currentUser = newAttendee; // Store the attendee data with the correct ID
+                generateQR(newAttendee);   // Use data with correct ID for QR
+                showSuccessPage(newAttendee); // Use data with correct ID for success page
+                
+                // Reset form
+                this.reset();
+                
+            } catch (error) {
+                console.error('Registration Error:', error); // More descriptive console log
+                alert('Lỗi đăng ký: ' + (error && error.message ? error.message : JSON.stringify(error)));
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Đăng Ký';
+            }
+        });
+
+        function generateQR(userData) {
+            const canvas = document.getElementById('qr-canvas');
+            const qrData = JSON.stringify({
+                id: userData.id,
+                name: userData.name, // Use .name consistent with Supabase column
+                phone: userData.phone
+            });
+            
+            QRCode.toCanvas(canvas, qrData, {
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff'
+            });
+        }
+
+        function showSuccessPage(userData) {
+            document.getElementById('userInfo').innerHTML = `
+                <strong>Mã ID:</strong> ${userData.id}<br>
+                <strong>Họ Tên:</strong> ${userData.name}<br> <!-- Use .name consistent with Supabase column -->
+                <strong>Điện Thoại:</strong> ${userData.phone}
+            `;
+            showPage('success');
+        }
+
+        function downloadQR() {
+            const canvas = document.getElementById('qr-canvas');
+            const link = document.createElement('a');
+            link.download = `QR_${currentUser.id}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // QR Scanner
+        function startQRScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+            
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader", 
+                { fps: 10, qrbox: 250 }
+            );
+            
+            html5QrcodeScanner.render(onScanSuccess, onScanError);
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            try {
+                const qrData = JSON.parse(decodedText);
+                processCheckin(qrData);
+            } catch (error) {
+                document.getElementById('scan-result').innerHTML = 
+                    '<div class="alert alert-danger">Mã QR không hợp lệ!</div>';
+            }
+        }
+
+        function onScanError(error) {
+            // Ignore scan errors
+        }
+
+        async function processCheckin(qrData) {
+            try {
+                // Tìm participant trong Supabase
+                const { data: participant, error } = await supabase
+                    .from('attendees') // Correct table name
+                    .select('*')
+                    .eq('id', qrData.id)
+                    .single();
+                
+                if (error || !participant) {
+                    document.getElementById('scan-result').innerHTML = 
+                        '<div class="alert alert-danger">Không tìm thấy thông tin đăng ký!</div>';
+                    return;
+                }
+                
+                if (participant.checked_in) {
+                    document.getElementById('scan-result').innerHTML = 
+                        `<div class="alert alert-warning">
+                            <strong>${participant.name}</strong> đã check-in trước đó!<br> <!-- Use .name -->
+                            Thời gian: ${new Date(participant.checkin_time).toLocaleString('vi-VN')}
+                        </div>`;
+                    return;
+                }
+                
+                // Update check-in status
+                const { error: updateError } = await supabase
+                    .from('attendees') // Correct table name
+                    .update({ 
+                        checked_in: true, 
+                        checkin_time: new Date().toISOString() 
+                    })
+                    .eq('id', qrData.id);
+                
+                if (updateError) {
+                    throw updateError;
+                }
+                
+                // Show success
+                document.getElementById('checkinInfo').innerHTML = `
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-user-check"></i> ${participant.name}</h5> <!-- Use .name -->
+                        <p><strong>Điện thoại:</strong> ${participant.phone}</p>
+                        <p><strong>Thời gian:</strong> ${new Date().toLocaleString('vi-VN')}</p>
+                    </div>
+                `;
+                
+                if (html5QrcodeScanner) {
+                    html5QrcodeScanner.clear();
+                }
+                
+                showPage('checkin-success');
+                
+            } catch (error) {
+                console.error('Check-in error:', error);
+                document.getElementById('scan-result').innerHTML = 
+                    '<div class="alert alert-danger">Lỗi khi check-in: ' + (error && error.message ? error.message : JSON.stringify(error)) + '</div>';
+            }
+        }
+
+        // Admin Panel
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === 'admin123') { // Đổi mật khẩu mạnh hơn
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                loadAdminData();
+            } else {
+                alert('Mật khẩu không đúng!');
+            }
+        }
+
+        async function loadAdminData() {
+            try {
+                const { data: participants, error } = await supabase
+                    .from('attendees') // Correct table name
+                    .select('*')
+                    .order('registered_at', { ascending: false }); // Assuming 'registered_at' column exists
+                
+                if (error) {
+                    throw error;
+                }
+                
+                const total = participants.length;
+                const checkedIn = participants.filter(p => p.checked_in).length;
+                const pending = total - checkedIn;
+                
+                document.getElementById('totalRegistered').textContent = total;
+                document.getElementById('totalCheckedIn').textContent = checkedIn;
+                document.getElementById('totalPending').textContent = pending;
+                
+                const tbody = document.getElementById('participantsList');
+                tbody.innerHTML = '';
+                
+                participants.forEach((participant, index) => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${participant.name}</td> <!-- Use .name -->
+                        <td>${participant.phone}</td>
+                        <td>${participant.email || 'N/A'}</td>
+                        <td>${participant.company || 'N/A'}</td>
+                        <td>
+                            <span class="badge ${participant.checked_in ? 'bg-success' : 'bg-secondary'}">
+                                ${participant.checked_in ? 'Đã Check-in' : 'Chưa Check-in'}
+                            </span>
+                        </td>
+                        <td>${participant.checkin_time ? new Date(participant.checkin_time).toLocaleString('vi-VN') : 'N/A'}</td>
+                    `;
+                });
+                
+            } catch (error) {
+                console.error('Load admin data error:', error);
+                alert('Lỗi tải dữ liệu: ' + (error && error.message ? error.message : JSON.stringify(error)));
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('register');
+        });
+    </script>
+</body>
+</html>

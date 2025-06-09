@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký tham dự hội thảo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.38.0/umd/index.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .card {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            border: none;
+        }
+        .card-header {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            text-align: center;
+            padding: 25px;
+        }
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-code canvas {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            background: white;
+        }
+        .btn-custom {
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        }
+        .success-container {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        .navigation {
+            margin-bottom: 30px;
+        }
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            margin: 0 10px;
+            padding: 10px 20px !important;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navigation">
+        <div class="container">
+            <a class="navbar-brand text-white fw-bold" href="#">
+                <i class="fas fa-calendar-alt me-2"></i>Hội thảo 2024
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" href="index.html">
+                    <i class="fas fa-user-plus me-1"></i>Đăng ký
+                </a>
+                <a class="nav-link" href="admin.html">
+                    <i class="fas fa-users me-1"></i>Admin
+                </a>
+                <a class="nav-link" href="checkin.html">
+                    <i class="fas fa-qrcode me-1"></i>Check-in
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <!-- Form đăng ký -->
+                <div class="card" id="registrationCard">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Đăng ký tham dự
+                        </h3>
+                        <p class="mb-0 mt-2 opacity-75">Vui lòng điền thông tin của bạn</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label for="name" class="form-label fw-bold">
+                                    <i class="fas fa-user text-primary me-1"></i>Họ và tên
+                                </label>
+                                <input type="text" class="form-control" id="name" required 
+                                       placeholder="Nhập họ và tên của bạn">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label fw-bold">
+                                    <i class="fas fa-envelope text-primary me-1"></i>Email
+                                </label>
+                                <input type="email" class="form-control" id="email" required 
+                                       placeholder="Nhập địa chỉ email">
+                            </div>
+                            <div class="mb-4">
+                                <label for="phone" class="form-label fw-bold">
+                                    <i class="fas fa-phone text-primary me-1"></i>Số điện thoại
+                                </label>
+                                <input type="tel" class="form-control" id="phone" required 
+                                       placeholder="Nhập số điện thoại">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-custom">
+                                <i class="fas fa-paper-plane me-2"></i>Đăng ký ngay
+                            </button>
+                        </form>
+                        <div id="loadingMessage" class="text-center mt-3" style="display:none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Đang xử lý...</p>
+                        </div>
+                        <div id="errorMessage" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <!-- Thành công -->
+                <div class="card success-container" id="successCard">
+                    <div class="card-header bg-success">
+                        <h3 class="mb-0">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Đăng ký thành công!
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-thumbs-up me-2"></i>Chúc mừng!</h5>
+                            <p class="mb-0">Bạn đã đăng ký thành công. Vui lòng lưu mã QR dưới đây để check-in tại hội thảo.</p>
+                        </div>
+                        
+                        <div class="qr-code" id="qrCode"></div>
+                        
+                        <div class="mt-4">
+                            <button class="btn btn-success btn-custom me-2" onclick="downloadQR()">
+                                <i class="fas fa-download me-2"></i>Tải QR Code
+                            </button>
+                            <button class="btn btn-outline-primary btn-custom" onclick="registerAnother()">
+                                <i class="fas fa-plus me-2"></i>Đăng ký khác
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <h6><i class="fas fa-info-circle text-info me-2"></i>Lưu ý quan trọng:</h6>
+                            <ul class="mb-0 text-start">
+                                <li>Vui lòng lưu mã QR này vào điện thoại</li>
+                                <li>Mang mã QR khi đến tham dự hội thảo</li>
+                                <li>Nhân viên sẽ quét mã để check-in cho bạn</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Khởi tạo Supabase
+        const supabaseUrl = 'https://daavpmtwlarsmwyhjxeg.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhYXZwbXR3bGFyc213eWhqeGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMzE4ODIsImV4cCI6MjA2NDYwNzg4Mn0.mGu2KMRzAOg2L7h4AU8eFaZlzJLD57W5vsGd_eGDeFk';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentQRData = null;
+
+        // Xử lý form đăng ký
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hiện loading
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('errorMessage').innerHTML = '';
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                checked_in: false
+            };
+
+            try {
+                console.log('Đang gửi dữ liệu:', formData);
+                
+                const { data, error } = await supabase
+                    .from('attendees')
+                    .insert([formData])
+                    .select();
+
+                console.log('Kết quả:', { data, error });
+
+                if (error) {
+                    throw error;
+                }
+
+                // Tạo QR code với ID từ database
+                const qrData = JSON.stringify({
+                    id: data[0].id,
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone
+                });
+
+                currentQRData = qrData;
+                generateQRCode(qrData);
+                
+                // Hiện card thành công
+                document.getElementById('registrationCard').style.display = 'none';
+                document.getElementById('successCard').style.display = 'block';
+
+            } catch (error) {
+                console.error('Lỗi đăng ký:', error);
+                document.getElementById('errorMessage').innerHTML = 
+                    `<div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Lỗi: ${error.message}
+                    </div>`;
+            } finally {
+                document.getElementById('loadingMessage').style.display = 'none';
+            }
+        });
+
+        // Tạo QR Code
+        function generateQRCode(data) {
+            const qrCodeDiv = document.getElementById('qrCode');
+            qrCodeDiv.innerHTML = '';
+            
+            QRCode.toCanvas(qrCodeDiv, data, {
+                width: 200,
+                height: 200,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function (error) {
+                if (error) {
+                    console.error('Lỗi tạo QR:', error);
+                } else {
+                    console.log('QR code đã được tạo thành công');
+                }
+            });
+        }
+
+        // Tải QR Code
+        function downloadQR() {
+            const canvas = document.querySelector('#qrCode canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'qr-code-hoi-thao.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        }
+
+        // Đăng ký người khác
+        function registerAnother() {
+            document.getElementById('registrationCard').style.display = 'block';
+            document.getElementById('successCard').style.display = 'none';
+            document.getElementById('registerForm').reset();
+        }
+
+        // Test kết nối Supabase khi trang load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                console.log('Đang test kết nối Supabase...');
+                const { data, error } = await supabase
+                    .from('attendees')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    console.error('Lỗi kết nối:', error);
+                } else {
+                    console.log('Kết nối Supabase thành công. Số bản ghi:', data);
+                }
+            } catch (error) {
+                console.error('Lỗi test kết nối:', error);
+            }
+        });
+    </script>
+</body>
+</html>

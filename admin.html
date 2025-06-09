@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quản lý danh sách</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.38.0/umd/index.js"></script>
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 10px;
+        }
+        .card-header {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #495057;
+            background: #f8f9fa;
+        }
+        .badge {
+            font-size: 0.75em;
+            padding: 0.5em 0.75em;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 0.2rem;
+        }
+        .stats-card {
+            background: linear-gradient(45deg, #007bff, #6f42c1);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            margin: 0 5px;
+            padding: 8px 15px !important;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .nav-link.active {
+            background: rgba(255,255,255,0.3);
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-calendar-alt me-2"></i>Hội thảo 2024
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-user-plus me-1"></i>Đăng ký
+                </a>
+                <a class="nav-link active" href="admin.html">
+                    <i class="fas fa-users me-1"></i>Admin
+                </a>
+                <a class="nav-link" href="checkin.html">
+                    <i class="fas fa-qrcode me-1"></i>Check-in
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Thống kê -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <div class="stats-number" id="totalAttendees">0</div>
+                    <div>Tổng đăng ký</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <div class="stats-number" id="checkedInCount">0</div>
+                    <div>Đã check-in</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <div class="stats-number" id="notCheckedInCount">0</div>
+                    <div>Chưa check-in</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <div class="stats-number" id="checkinRate">0%</div>
+                    <div>Tỷ lệ check-in</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-users me-2"></i>Danh sách người tham dự
+                </h4>
+                <div>
+                    <button class="btn btn-light me-2" onclick="loadAttendees()">
+                        <i class="fas fa-sync me-1"></i>Tải lại
+                    </button>
+                    <button class="btn btn-success" onclick="exportData()">
+                        <i class="fas fa-file-excel me-1"></i>Xuất Excel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Đang tải dữ liệu...</p>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Điện thoại</th>
+                                <th>Trạng thái</th>
+                                <th>Thời gian đăng ký</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendeesTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal sửa thông tin -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Sửa thông tin
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editId">
+                        <div class="mb-3">
+                            <label for="editName" class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control" id="editName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPhone" class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" id="editPhone" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Hủy
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="updateAttendee()">
+                        <i class="fas fa-save me-1"></i>Cập nhật
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Khởi tạo Supabase
+        const supabaseUrl = 'https://daavpmtwlarsmwyhjxeg.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhYXZwbXR3bGFyc213eWhqeGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMzE4ODIsImV4cCI6MjA2NDYwNzg4Mn0.mGu2KMRzAOg2L7h4AU8eFaZlzJLD57W5vsGd_eGDeFk';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Tải danh sách khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAttendees();
+        });
+
+        // Tải danh sách người tham dự
+        async function loadAttendees() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('attendees')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                console.log('Dữ liệu nhận được:', data);
+                
+                // Cập nhật thống kê
+                updateStats(data);
+                
+                // Cập nhật bảng
+                const tbody = document.getElementById('attendeesTable');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                Chưa có người đăng ký nào
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    data.forEach((attendee, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>
+                                <strong>${attendee.name}</strong>
+                            </td>
+                            <td>${attendee.email}</td>
+                            <td>${attendee.phone || '<span class="text-muted">Chưa có</span>'}</td>
+                            <td>
+                                <span class="badge ${attendee.checked_in ? 'bg-success' : 'bg-warning'}">
+                                    <i class="fas ${attendee.checked_in ? 'fa-check-circle' : 'fa-clock'} me-1"></i>
+                                    ${attendee.checked_in ? 'Đã check-in' : 'Chưa check-in'}
+                                </span>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    ${new Date(attendee.created_at).toLocaleString('vi-VN')}
+                                </small>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning me-1" 
+                                        onclick="editAttendee('${attendee.id}', '${attendee.name}', '${attendee.email}', '${attendee.phone || ''}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="deleteAttendee('${attendee.id}', '${attendee.name}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+
+            } catch (error) {
+                console.error('Lỗi tải danh sách:', error);
+                document.getElementById('attendeesTable').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-danger py-4">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>
+                            Lỗi tải dữ liệu: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            } finally {
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        }
+
+        // Cập nhật thống kê
+        function updateStats(data) {
+            const total = data.length;
+            const checkedIn = data.filter(item => item.checked_in).length;
+            const notCheckedIn = total - checkedIn;
+            const rate = total > 0 ? Math.round((checkedIn / total) * 100) : 0;
+
+            document.getElementById('totalAttendees').textContent = total;
+            document.getElementById('checkedInCount').textContent = checkedIn;
+            document.getElementById('notCheckedInCount').textContent = notCheckedIn;
+            document.getElementById('checkinRate').textContent = rate + '%';
+        }
+
+        // Sửa thông tin
+        function editAttendee(id, name, email, phone) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editPhone').value = phone;
+            
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
+
+        // Cập nhật thông tin
+        async function updateAttendee() {
+            const id = document.getElementById('editId').value;
+            const updateData = {
+                name: document.getElementById('editName').value,
+                email: document.getElementById('editEmail').value,
+                phone: document.getElementById('editPhone').value
+            };
+
+            try {
+                const { error } = await supabase
+                    .from('attendees')
+                    .update(updateData)
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                modal.hide();
+                
+                // Hiện thông báo thành công
+                showToast('Cập nhật thông tin thành công!', 'success');
+                
+                loadAttendees();
+
+            } catch (error) {
+                console.error('Lỗi cập nhật:', error);
+                showToast('Lỗi cập nhật: ' + error.message, 'error');
+            }
+        }
