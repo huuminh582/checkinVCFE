@@ -93,8 +93,8 @@
                             <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:</p>
                             <canvas id="qr-canvas"></canvas>
                             <div id="userInfo" class="mt-3 p-3 bg-light rounded"></div>
-                            <!-- FIX: Thay đổi nút để kích hoạt Modal -->
-                            <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#qrModal">
+                            <!-- === MODIFIED BUTTON === -->
+                            <button type="button" class="btn btn-primary mt-3" id="saveQrButton">
                                 <i class="fas fa-download"></i> Lưu QR Code
                             </button>
                             <button class="btn btn-outline-primary mt-3 ms-2" onclick="showPage('register')">
@@ -207,9 +207,10 @@
                 if (error) throw error;
                 currentUser = insertedData[0];
                 showNotification('Đăng ký thành công!', 'success');
-                generateQR(currentUser); // FIX: Đổi tên hàm cho đúng chức năng
+                generateQR(currentUser);
                 showSuccessPage(currentUser);
-                this.reset();
+                // Don't reset the form here, we need the name for the download
+                // this.reset(); 
             } catch (error) {
                 console.error('Registration Error:', error);
                 showNotification(`Lỗi đăng ký: ${error.message}`, 'danger');
@@ -219,14 +220,12 @@
             }
         });
 
-        // FIX: Cập nhật hàm để đưa QR vào cả canvas và modal
         function generateQR(userData) {
             const canvas = document.getElementById('qr-canvas');
             const qrData = JSON.stringify({ id: userData.id, name: userData.name, phone: userData.phone });
             
             QRCode.toCanvas(canvas, qrData, { width: 200, height: 200 }, function (error) {
                 if (error) console.error(error);
-                // Lấy dữ liệu ảnh từ canvas và đưa vào thẻ <img> trong modal
                 const qrImageInModal = document.getElementById('qrImageInModal');
                 qrImageInModal.src = canvas.toDataURL('image/png');
             });
@@ -318,9 +317,45 @@
             }
         }
 
+        // === NEW FUNCTION TO HANDLE SAVE BUTTON LOGIC ===
+        function setupSaveButtonListener() {
+            const saveBtn = document.getElementById('saveQrButton');
+            if (!saveBtn) return;
+
+            const qrModalEl = document.getElementById('qrModal');
+            if (!qrModalEl) return;
+            const qrModal = new bootstrap.Modal(qrModalEl);
+
+            saveBtn.addEventListener('click', () => {
+                // Check if it's a touch device
+                const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+                if (isMobile) {
+                    // On mobile, show the modal for press-and-hold save
+                    qrModal.show();
+                } else {
+                    // On PC, trigger a direct download
+                    const canvas = document.getElementById('qr-canvas');
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    
+                    const fileName = currentUser ? `QR-Code-${currentUser.name.replace(/\s+/g, '-')}.png` : 'Ma-QR-HoiThao.png';
+                    link.download = fileName;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showNotification('Đã bắt đầu tải mã QR!', 'info');
+                }
+            });
+        }
+
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             showPage('register');
+            // Set up the listener for the save button
+            setupSaveButtonListener();
         });
     </script>
 </body>
