@@ -9,119 +9,43 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
-        /* === GLOBAL STYLES === */
-        body {
-            background-color: #f4f7f6; /* Light grey background for the whole app */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .page { display: none; }
         .page.active { display: block; }
         .card { border: none; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
-
-        /* === NAVIGATION BAR === */
-        .navbar {
-            background-color: #0d6efd; /* Solid blue background */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .navbar .navbar-brand, .navbar .nav-link {
-            color: #fff !important;
-            font-weight: 500;
-        }
-        .navbar .nav-link:hover {
-            color: #e9ecef !important;
-        }
-        .navbar .nav-link .fas {
-            margin-right: 5px;
-        }
-
-        /* === REGISTER PAGE === */
-        #register .card { overflow: hidden; }
+        .navbar { background-color: #0d6efd; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .navbar .navbar-brand, .navbar .nav-link { color: #fff !important; font-weight: 500; }
+        .navbar .nav-link .fas { margin-right: 5px; }
         .register-header { background-color: #007bff; padding: 20px; }
-        #register .card-body { background-color: #ffffff; }
-        #register .form-label { color: #333; font-weight: 500; }
-        #register .form-control { border: 1px solid #ced4da; padding: 12px; border-radius: 8px; }
-        #register .form-control::placeholder { color: #adb5bd; }
-        #register .btn-primary { background-color: #007bff; border: none; border-radius: 25px; padding: 12px; font-weight: bold; }
-        #register .btn-primary:hover { background-color: #0056b3; transform: translateY(-2px); }
-
-        /* === ADMIN PAGE === */
-        .admin-stat-card {
-            background: linear-gradient(135deg, #0d6efd, #764ba2);
-            color: white;
-            border-radius: 12px;
-            padding: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .admin-stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-        }
-        .admin-stat-card h1 { font-size: 2.5rem; font-weight: 700; }
-        .admin-stat-card p { font-size: 1rem; opacity: 0.9; }
-
-        #admin .list-container {
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-        #admin .list-header {
-            background-color: #198754;
-            color: white;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #admin .list-header h5 { margin: 0; font-weight: 600; }
-        #admin .btn-light {
-            background-color: rgba(255,255,255,0.9);
-            border: none;
-            color: #333;
-            font-weight: 500;
-        }
-        #admin .btn-light:hover {
-            background-color: #fff;
-        }
-        #admin .table {
-            margin-bottom: 0;
-        }
-        #admin .table thead th {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-            font-weight: 600;
-            color: #495057;
-        }
-        #admin .table tbody tr:hover {
-            background-color: #f1f3f5;
-        }
-        #admin .badge {
-            padding: 0.5em 0.75em;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        .btn-action {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        /* === OTHER PAGES === */
-        #qr-canvas { margin: 20px auto; display: block; }
-        .form-control:focus {
-            border-color: #764ba2;
-            box-shadow: 0 0 0 0.25rem rgba(118, 75, 162, 0.25);
+        #qr-canvas { margin: 20px auto; display: block; border: 1px solid #eee; border-radius: 8px; }
+        /* === NEW: Style for the in-app browser warning === */
+        #in-app-browser-warning {
+            display: none; /* Hidden by default */
+            position: sticky;
+            top: 0;
+            z-index: 1200;
         }
     </style>
 </head>
 <body>
+    <!-- === NEW: In-app browser warning bar === -->
+    <div id="in-app-browser-warning" class="alert alert-warning text-center mb-0 p-2" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> Để có trải nghiệm tốt nhất, vui lòng mở bằng trình duyệt Safari hoặc Chrome.
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="javascript:void(0)" onclick="showPage('register')"><i class="fas fa-calendar-check"></i> Hội thảo 2024</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="javascript:void(0)" onclick="showPage('register')"><i class="fas fa-user-plus"></i>Đăng ký</a>
-                <a class="nav-link" href="javascript:void(0)" onclick="showPage('admin')"><i class="fas fa-shield-alt"></i>Admin</a>
-                <a class="nav-link" href="javascript:void(0)" onclick="initiateScanPage()"><i class="fas fa-qrcode"></i>Check-in</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="javascript:void(0)" onclick="showPage('register')"><i class="fas fa-user-plus"></i>Đăng ký</a>
+                    <a class="nav-link" href="admin.html"><i class="fas fa-shield-alt"></i>Admin</a>
+                    <a class="nav-link" href="javascript:void(0)" onclick="initiateScanPage()"><i class="fas fa-qrcode"></i>Check-in</a>
+                </div>
             </div>
         </div>
     </nav>
@@ -179,10 +103,11 @@
                             <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:</p>
                             <canvas id="qr-canvas"></canvas>
                             <div id="userInfo" class="mt-3 p-3 bg-light rounded"></div>
-                            <button class="btn btn-primary mt-3" onclick="downloadQR()">
-                                <i class="fas fa-download"></i> Tải QR Code
-                            </button>
-                            <button class="btn btn-outline-primary mt-3 ms-2" onclick="showPage('register')">
+                            <!-- === MODIFIED: Added onclick handler for custom notifications === -->
+                            <a class="btn btn-primary mt-3" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
+                                <i class="fas fa-download"></i> Lưu QR Code
+                            </a>
+                            <button class="btn btn-outline-primary mt-3 ms-2" onclick="showPage('register'); document.getElementById('registerForm').reset();">
                                 <i class="fas fa-plus"></i> Đăng Ký Mới
                             </button>
                         </div>
@@ -191,7 +116,7 @@
             </div>
         </div>
 
-        <!-- Trang Quét QR -->
+        <!-- Các trang khác giữ nguyên -->
         <div id="scan" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-8">
@@ -207,8 +132,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Trang Check-in Thành Công -->
         <div id="checkin-success" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -226,102 +149,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- Trang Admin -->
-        <div id="admin" class="page active">
-            <div id="admin-login" class="row justify-content-center align-items-center" style="min-height: 70vh;">
-                <div class="col-md-4">
-                    <div class="card p-4 text-center">
-                        <h4 class="mb-3"><i class="fas fa-shield-alt me-2"></i>Quản Trị Viên</h4>
-                        <input type="password" class="form-control mb-3" id="adminPassword" placeholder="Mật khẩu admin">
-                        <button class="btn btn-primary w-100" onclick="adminLogin()">
-                            <i class="fas fa-sign-in-alt me-2"></i>Đăng Nhập
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="admin-panel" style="display: none;">
-                <!-- Stat Cards -->
-                <div class="row g-4 mb-4">
-                    <div class="col-xl-3 col-md-6"><div class="admin-stat-card text-center"><h1 id="totalRegistered">0</h1><p>Tổng đăng ký</p></div></div>
-                    <div class="col-xl-3 col-md-6"><div class="admin-stat-card text-center"><h1 id="totalCheckedIn">0</h1><p>Đã check-in</p></div></div>
-                    <div class="col-xl-3 col-md-6"><div class="admin-stat-card text-center"><h1 id="totalPending">0</h1><p>Chưa check-in</p></div></div>
-                    <div class="col-xl-3 col-md-6"><div class="admin-stat-card text-center"><h1 id="checkinRate">0%</h1><p>Tỷ lệ check-in</p></div></div>
-                </div>
-
-                <!-- Participants List -->
-                <div class="list-container">
-                    <div class="list-header">
-                        <h5><i class="fas fa-users me-2"></i>Danh sách người tham dự</h5>
-                        <div>
-                            <button class="btn btn-light btn-sm" onclick="loadAdminData()">
-                                <i class="fas fa-sync-alt me-2"></i>Tải lại
-                            </button>
-                            <button class="btn btn-light btn-sm ms-2" onclick="exportToExcel()">
-                                <i class="fas fa-file-excel me-2"></i>Xuất Excel
-                            </button>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Họ tên</th>
-                                    <th>Email</th>
-                                    <th>Điện thoại</th>
-                                    <th>Công ty/Tổ chức</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thời gian đăng ký</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="participantsList"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
-
-    <!-- Edit Participant Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Chỉnh sửa thông tin người tham dự</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editForm">
-                        <input type="hidden" id="edit-id">
-                        <div class="mb-3">
-                            <label for="edit-name" class="form-label">Họ và tên</label>
-                            <input type="text" class="form-control" id="edit-name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="edit-email">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-phone" class="form-label">Số điện thoại</label>
-                            <input type="tel" class="form-control" id="edit-phone" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-company" class="form-label">Công ty/Tổ chức</label>
-                            <input type="text" class="form-control" id="edit-company">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary" onclick="saveChanges()">Lưu thay đổi</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
@@ -334,23 +162,20 @@
         const checkinSound = new Audio('https://cdn.freesound.org/previews/253/253177_4486188-lq.mp3');
         let currentUser = null;
         let html5QrcodeScanner = null;
-        let editModal = null; // Global variable for the modal instance
 
         // --- UTILITY FUNCTIONS ---
-        function showNotification(message, type = 'info') {
+        // === MODIFIED: Added duration parameter ===
+        function showNotification(message, type = 'info', duration = 5000) {
             const container = document.getElementById('notification-container');
             const toast = document.createElement('div');
             toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
-            toast.role = 'alert';
-            toast.ariaLive = 'assertive';
-            toast.ariaAtomic = 'true';
             toast.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
             container.appendChild(toast);
             setTimeout(() => {
                 const bsToast = new bootstrap.Toast(toast, { autohide: true });
                 bsToast.hide();
-                setTimeout(() => toast.remove(), 500);
-            }, 5000);
+                setTimeout(() => toast.remove(), duration);
+            }, duration);
         }
 
         function showPage(pageId) {
@@ -358,13 +183,8 @@
             document.getElementById(pageId).classList.add('active');
             if (pageId === 'scan') {
                 startQRScanner();
-            } else if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) {
+            } else if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
                  html5QrcodeScanner.clear().catch(err => console.error("Failed to clear scanner:", err));
-            }
-            if (pageId === 'admin') {
-                if (document.getElementById('admin-panel').style.display === 'block') {
-                    loadAdminData();
-                }
             }
         }
 
@@ -375,16 +195,17 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
             try {
-                const registrationPayload = { name: document.getElementById('name').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value || null, company: document.getElementById('company').value || null, registered_at: new Date().toISOString(), checked_in: false, checkin_time: null };
-                const { data: insertedData, error } = await supabase.from('attendees').insert([registrationPayload]).select();
+                const payload = { name: document.getElementById('name').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value || null, company: document.getElementById('company').value || null, registered_at: new Date().toISOString(), checked_in: false, checkin_time: null };
+                const { data: insertedData, error } = await supabase.from('attendees').insert([payload]).select();
                 if (error) throw error;
-                if (!insertedData || insertedData.length === 0) throw new Error("Không nhận được dữ liệu sau khi đăng ký.");
                 currentUser = insertedData[0];
                 showNotification('Đăng ký thành công!', 'success');
-                generateQR(currentUser);
+                
+                await generateQR(currentUser);
                 showSuccessPage(currentUser);
-                this.reset();
-            } catch (error) {
+
+            } catch (error)
+                {
                 console.error('Registration Error:', error);
                 showNotification(`Lỗi đăng ký: ${error.message}`, 'danger');
             } finally {
@@ -394,9 +215,25 @@
         });
 
         function generateQR(userData) {
-            const canvas = document.getElementById('qr-canvas');
-            const qrData = JSON.stringify({ id: userData.id, name: userData.name, phone: userData.phone });
-            QRCode.toCanvas(canvas, qrData, { width: 200, height: 200 });
+            return new Promise((resolve, reject) => {
+                const canvas = document.getElementById('qr-canvas');
+                const qrData = JSON.stringify({ id: userData.id, name: userData.name, phone: userData.phone });
+                
+                QRCode.toCanvas(canvas, qrData, { width: 200, height: 200 }, function (error) {
+                    if (error) {
+                        console.error(error);
+                        reject(error);
+                        return;
+                    }
+                    
+                    const downloadLink = document.getElementById('saveQrButton');
+                    if (downloadLink) {
+                        downloadLink.href = canvas.toDataURL('image/png');
+                        downloadLink.download = `QR-Code-${userData.name.replace(/\s+/g, '-')}.png`;
+                    }
+                    resolve();
+                });
+            });
         }
 
         function showSuccessPage(userData) {
@@ -404,16 +241,34 @@
             showPage('success');
         }
 
-        function downloadQR() {
-            const canvas = document.getElementById('qr-canvas');
-            const link = document.createElement('a');
-            link.download = `QR_${currentUser.name.replace(/\s/g, '_')}_${currentUser.id}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
+        // --- PLATFORM DETECTION & SAVE LOGIC ---
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
 
-        // --- QR SCANNING FLOW ---
+        function isInAppBrowser() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            return /Zalo|FBAN|FBAV|Twitter|Instagram/.test(userAgent);
+        }
+
+        // === NEW: Click handler for the save button ===
+        function handleSaveClick() {
+            if (isIOS()) {
+                // Show a specific, longer notification for iOS users
+                showNotification('Mã QR đã được lưu vào ứng dụng Tệp (Files) trên iPhone của bạn.', 'info', 8000);
+            } else {
+                // Standard notification for others
+                showNotification('Đã bắt đầu tải mã QR!', 'info');
+            }
+            // The default download action of the <a> tag will proceed after this function.
+        }
+
+        // --- QR SCANNING FLOW (Unchanged) ---
         function initiateScanPage() {
+            const scanResultDiv = document.getElementById('scan-result');
+            if (scanResultDiv) {
+                scanResultDiv.innerHTML = '';
+            }
             checkinSound.play().catch(e => {});
             checkinSound.pause();
             checkinSound.currentTime = 0;
@@ -421,23 +276,15 @@
         }
 
         function startQRScanner() {
-            if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) return;
+            if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+                return;
+            }
             html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: { width: 250, height: 250 } });
             html5QrcodeScanner.render(onScanSuccess, onScanError);
         }
 
-        function resetScanView() {
-            document.getElementById('scan-result').innerHTML = '';
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().catch(error => {
-                    console.error("Lỗi khi xóa trình quét.", error);
-                });
-            }
-            startQRScanner();
-        }
-
         function onScanSuccess(decodedText, decodedResult) {
-            if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) {
+            if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
                 html5QrcodeScanner.pause(true);
             }
             try {
@@ -445,209 +292,66 @@
                 if (!qrData.id || !qrData.name) throw new Error("Mã QR không hợp lệ.");
                 processCheckin(qrData);
             } catch (error) {
-                const errorMessage = error ? (error.message || 'Lỗi không xác định') : 'Lỗi không xác định';
-                document.getElementById('scan-result').innerHTML = `<div class="alert alert-danger">${errorMessage}</div><button class="btn btn-info mt-2" onclick="resetScanView()"><i class="fas fa-qrcode"></i> Quét Lại</button>`;
+                const scanResultDiv = document.getElementById('scan-result');
+                scanResultDiv.innerHTML = `<div class="alert alert-danger">${error.message}</div><button class="btn btn-info mt-2" onclick="initiateScanPage()">Quét Lại</button>`;
             }
         }
 
-        function onScanError(error) { /* Ignore */ }
+        function onScanError(error) {
+            if (!error.includes("No QR code found")) {
+                console.error("QR Scan Error:", error);
+            }
+        }
 
         async function processCheckin(qrData) {
             const scanResultDiv = document.getElementById('scan-result');
             try {
                 const { data: participant, error } = await supabase.from('attendees').select('*').eq('id', qrData.id).single();
                 if (error || !participant) {
-                    scanResultDiv.innerHTML = `<div class="alert alert-danger">Không tìm thấy thông tin đăng ký!</div><button class="btn btn-info mt-2" onclick="resetScanView()"><i class="fas fa-qrcode"></i> Quét Lại</button>`;
-                    return;
+                    throw new Error("Không tìm thấy thông tin đăng ký cho mã QR này!");
                 }
                 if (participant.checked_in) {
-                    scanResultDiv.innerHTML = `<div class="alert alert-warning"><strong>${participant.name}</strong> đã check-in trước đó!<br>Thời gian: ${new Date(participant.checkin_time).toLocaleString('vi-VN')}</div><button class="btn btn-info mt-2" onclick="resetScanView()"><i class="fas fa-qrcode"></i> Quét Lại</button>`;
+                    scanResultDiv.innerHTML = `<div class="alert alert-warning"><strong>${participant.name}</strong> đã check-in trước đó!<br>Thời gian: ${new Date(participant.checkin_time).toLocaleString('vi-VN')}</div><button class="btn btn-info mt-2" onclick="initiateScanPage()">Quét Lại</button>`;
                     return;
                 }
-                const { error: updateError } = await supabase.from('attendees').update({ checked_in: true, checkin_time: new Date().toISOString() }).eq('id', qrData.id);
+                
+                const checkinTime = new Date();
+                const { error: updateError } = await supabase.from('attendees').update({ checked_in: true, checkin_time: checkinTime.toISOString() }).eq('id', qrData.id);
                 if (updateError) throw updateError;
+                
                 checkinSound.play();
-                document.getElementById('checkinInfo').innerHTML = `<div class="alert alert-success"><h5><i class="fas fa-user-check"></i> ${participant.name}</h5><p><strong>Điện thoại:</strong> ${participant.phone}</p><p><strong>Email:</strong> ${participant.email || 'N/A'}</p><p><strong>Công ty:</strong> ${participant.company || 'N/A'}</p><p><strong>Thời gian:</strong> ${new Date().toLocaleString('vi-VN')}</p></div>`;
-                if (html5QrcodeScanner) html5QrcodeScanner.clear().catch(err => {});
-                showPage('checkin-success');
-            } catch (error) {
-                console.error('Check-in error:', error);
-                const errorMessage = error ? (error.message || 'Lỗi không xác định') : 'Lỗi không xác định';
-                scanResultDiv.innerHTML = `<div class="alert alert-danger">Lỗi khi check-in: ${errorMessage}</div><button class="btn btn-info mt-2" onclick="resetScanView()"><i class="fas fa-qrcode"></i> Quét Lại</button>`;
-            }
-        }
-
-        // --- ADMIN FLOW ---
-        function adminLogin() {
-            const password = document.getElementById('adminPassword').value;
-            if (password === 'admin123') {
-                document.getElementById('admin-login').style.display = 'none';
-                document.getElementById('admin-panel').style.display = 'block';
-                loadAdminData();
-            } else {
-                showNotification('Mật khẩu không đúng!', 'warning');
-            }
-        }
-
-        async function loadAdminData() {
-            try {
-                const { data: participants, error } = await supabase.from('attendees').select('*').order('registered_at', { ascending: false });
-                if (error) throw error;
-                const total = participants.length;
-                const checkedIn = participants.filter(p => p.checked_in).length;
-                const checkinRate = total > 0 ? ((checkedIn / total) * 100).toFixed(0) : 0;
-
-                document.getElementById('totalRegistered').textContent = total;
-                document.getElementById('totalCheckedIn').textContent = checkedIn;
-                document.getElementById('totalPending').textContent = total - checkedIn;
-                document.getElementById('checkinRate').textContent = `${checkinRate}%`;
-
-                const tbody = document.getElementById('participantsList');
-                tbody.innerHTML = '';
-                participants.forEach((p, index) => {
-                    const row = tbody.insertRow();
-                    const registeredTime = new Date(p.registered_at).toLocaleString('vi-VN');
-                    const statusBadge = p.checked_in
-                        ? `<span class="badge bg-success">Đã Check-in</span>`
-                        : `<span class="badge bg-secondary">Chưa Check-in</span>`;
-
-                    // **FIXED CODE HERE**
-                    // We create the buttons separately and add event listeners, which is safer.
-                    const actionsCell = document.createElement('td');
-                    
-                    const editButton = document.createElement('button');
-                    editButton.className = 'btn btn-action btn-outline-primary me-2';
-                    editButton.innerHTML = '<i class="fas fa-edit"></i> Sửa';
-                    editButton.onclick = () => openEditModal(p);
-                    
-                    const deleteButton = document.createElement('button');
-                    deleteButton.className = 'btn btn-action btn-outline-danger';
-                    deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i> Xóa';
-                    deleteButton.onclick = () => confirmDelete(p.id, p.name);
-
-                    actionsCell.appendChild(editButton);
-                    actionsCell.appendChild(deleteButton);
-
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${p.name}</td>
-                        <td>${p.email || 'N/A'}</td>
-                        <td>${p.phone}</td>
-                        <td>${p.company || 'N/A'}</td>
-                        <td>${statusBadge}</td>
-                        <td>${registeredTime}</td>
-                    `;
-                    row.appendChild(actionsCell); // Append the cell with buttons
-                });
-            } catch (error) {
-                console.error('Load admin data error:', error);
-                showNotification(`Lỗi tải dữ liệu admin: ${error.message}`, 'danger');
-            }
-        }
-        
-        function openEditModal(participant) {
-            document.getElementById('edit-id').value = participant.id;
-            document.getElementById('edit-name').value = participant.name;
-            document.getElementById('edit-email').value = participant.email || '';
-            document.getElementById('edit-phone').value = participant.phone;
-            document.getElementById('edit-company').value = participant.company || '';
-            editModal.show();
-        }
-
-        async function saveChanges() {
-            const id = document.getElementById('edit-id').value;
-            const updatedData = {
-                name: document.getElementById('edit-name').value,
-                email: document.getElementById('edit-email').value,
-                phone: document.getElementById('edit-phone').value,
-                company: document.getElementById('edit-company').value,
-            };
-
-            try {
-                const { error } = await supabase
-                    .from('attendees')
-                    .update(updatedData)
-                    .eq('id', id);
-
-                if (error) throw error;
-
-                showNotification('Cập nhật thành công!', 'success');
-                editModal.hide();
-                loadAdminData();
-            } catch (error) {
-                console.error('Update error:', error);
-                showNotification(`Lỗi khi cập nhật: ${error.message}`, 'danger');
-            }
-        }
-
-        async function confirmDelete(id, name) {
-            const userConfirmed = confirm(`Bạn có chắc chắn muốn xóa người tham dự "${name}" không? Hành động này không thể hoàn tác.`);
-            
-            if (userConfirmed) {
-                try {
-                    const { error } = await supabase
-                        .from('attendees')
-                        .delete()
-                        .eq('id', id);
-
-                    if (error) throw error;
-
-                    showNotification(`Đã xóa "${name}" thành công.`, 'success');
-                    loadAdminData(); // Refresh the table to show the deletion
-                } catch (error) {
-                    console.error('Delete error:', error);
-                    showNotification(`Lỗi khi xóa: ${error.message}`, 'danger');
+                
+                const checkinInfoDiv = document.getElementById('checkinInfo');
+                checkinInfoDiv.innerHTML = `
+                    <div class="alert alert-success text-start">
+                        <h5 class="text-center"><i class="fas fa-user-check"></i> ${participant.name}</h5>
+                        <hr>
+                        <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> ${participant.email || 'N/A'}</p>
+                        <p><strong><i class="fas fa-phone me-2"></i>Điện thoại:</strong> ${participant.phone}</p>
+                        <p><strong><i class="fas fa-building me-2"></i>Công ty:</strong> ${participant.company || 'N/A'}</p>
+                        <hr>
+                        <p class="text-center mb-0">Check-in thành công lúc ${checkinTime.toLocaleString('vi-VN')}</p>
+                    </div>
+                `;
+                
+                if (html5QrcodeScanner) {
+                    html5QrcodeScanner.clear().catch(err => console.error("Lỗi khi dọn dẹp scanner:", err));
                 }
-            }
-        }
-
-        async function exportToExcel() {
-            showNotification('Đang chuẩn bị file export...', 'info');
-            try {
-                const { data: participants, error } = await supabase
-                    .from('attendees')
-                    .select('*')
-                    .order('checked_in', { ascending: false })
-                    .order('checkin_time', { ascending: true });
-
-                if (error) throw error;
-
-                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-                const headers = ["STT", "Họ tên", "Email", "Điện thoại", "Công ty", "Trạng thái", "Thời gian đăng ký", "Thời gian Check-in"];
-                csvContent += headers.join(',') + '\r\n';
-
-                participants.forEach((p, index) => {
-                    const status = p.checked_in ? "Đã Check-in" : "Chưa Check-in";
-                    const regTime = new Date(p.registered_at).toLocaleString('vi-VN');
-                    const checkinTime = p.checkin_time ? new Date(p.checkin_time).toLocaleString('vi-VN') : "N/A";
-                    
-                    const name = `"${p.name.replace(/"/g, '""')}"`;
-                    const company = `"${(p.company || 'N/A').replace(/"/g, '""')}"`;
-                    const phoneForExcel = `="${p.phone}"`;
-
-                    const row = [index + 1, name, p.email || 'N/A', phoneForExcel, company, status, regTime, checkinTime];
-                    csvContent += row.join(',') + '\r\n';
-                });
-
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "danh_sach_tham_du.csv");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showNotification('Export thành công!', 'success');
+                showPage('checkin-success');
 
             } catch (error) {
-                console.error('Export error:', error);
-                showNotification(`Lỗi khi export: ${error.message}`, 'danger');
+                scanResultDiv.innerHTML = `<div class="alert alert-danger">Lỗi khi check-in: ${error.message}</div><button class="btn btn-info mt-2" onclick="initiateScanPage()">Quét Lại</button>`;
             }
         }
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
+            // Check for in-app browser and show warning if needed
+            if (isInAppBrowser()) {
+                document.getElementById('in-app-browser-warning').style.display = 'block';
+            }
+            
             showPage('register');
-            editModal = new bootstrap.Modal(document.getElementById('editModal'));
         });
     </script>
 </body>

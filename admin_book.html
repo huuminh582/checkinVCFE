@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Trị - Đơn Hàng Kỷ Yếu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .navbar { background-color: #4a00e0; }
+        .navbar .navbar-brand, .navbar .nav-link { color: #fff !important; }
+        .admin-stat-card { background: linear-gradient(135deg, #8e2de2, #4a00e0); color: white; border-radius: 12px; padding: 20px; }
+        .admin-stat-card h1 { font-size: 2.5rem; font-weight: 700; }
+        #admin .list-header { background-color: #198754; color: white; padding: 1rem 1.5rem; }
+        .table .form-check-input { cursor: pointer; transform: scale(1.2); }
+        .action-cell { min-width: 80px; text-align: center; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="register_book.html"><i class="fas fa-book-open"></i> Kỷ Yếu 2024</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="register_book.html"><i class="fas fa-home"></i> Trang Đặt Hàng</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1150"></div>
+
+    <div class="container mt-4" id="admin">
+        <!-- Login Page -->
+        <div id="admin-login" class="row justify-content-center align-items-center" style="min-height: 70vh;">
+            <div class="col-md-4">
+                <div class="card p-4 text-center">
+                    <h4 class="mb-3"><i class="fas fa-shield-alt me-2"></i>Quản Trị Đơn Hàng</h4>
+                    <input type="password" class="form-control mb-3" id="adminPassword" placeholder="Mật khẩu admin">
+                    <button class="btn btn-primary w-100" onclick="adminLogin()">Đăng Nhập</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="admin-panel" style="display: none;">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6"><div class="admin-stat-card text-center"><h1 id="totalOrders">0</h1><p>Tổng Đơn Hàng</p></div></div>
+                <div class="col-lg-3 col-md-6"><div class="admin-stat-card text-center"><h1 id="totalBooks">0</h1><p>Tổng Sách Đặt</p></div></div>
+                <div class="col-lg-3 col-md-6"><div class="admin-stat-card text-center"><h1 id="totalRevenue">0</h1><p>Tổng Doanh Thu</p></div></div>
+                <div class="col-lg-3 col-md-6"><div class="admin-stat-card text-center"><h1 id="pendingCount">0</h1><p>Đơn Chưa Giao</p></div></div>
+            </div>
+            <div class="card">
+                <div class="card-header list-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-users me-2"></i>Danh sách đơn hàng</h5>
+                    <div>
+                        <button class="btn btn-light btn-sm" onclick="loadAdminData()"><i class="fas fa-sync-alt me-2"></i>Tải lại</button>
+                        <button class="btn btn-light btn-sm ms-2" onclick="exportToExcel()"><i class="fas fa-file-excel me-2"></i>Xuất Excel</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ tên</th>
+                                <th>Điện thoại</th>
+                                <th>Email</th>
+                                <th>Số Lượng</th>
+                                <th>Tổng tiền</th>
+                                <th>Thời gian Đặt</th>
+                                <th class="text-center">Đã nhận</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Chỉnh sửa đơn hàng</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="edit-id">
+                        <div class="mb-3"><label class="form-label">Họ và tên</label><input type="text" class="form-control" id="edit-name" required></div>
+                        <div class="mb-3"><label class="form-label">Số điện thoại</label><input type="tel" class="form-control" id="edit-phone" required></div>
+                        <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="edit-email"></div>
+                        <div class="mb-3"><label class="form-label">Số lượng</label><input type="number" class="form-control" id="edit-quantity" min="1" required></div>
+                        <div class="mb-3"><label class="form-label">Trạng thái (Nội bộ)</label>
+                            <select id="edit-status" class="form-select">
+                                <option value="Chưa giao">Chưa giao</option>
+                                <option value="Đã giao">Đã giao</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-primary" onclick="saveChanges()">Lưu thay đổi</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://daavpmtwlarsmwyhjxeg.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhYXZwbXR3bGFyc213eWhqeGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMzE4ODIsImV4cCI6MjA2NDYwNzg4Mn0.mGu2KMRzAOg2L7h4AU8eFaZlzJLD57W5vsGd_eGDeFk';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const BOOK_PRICE = 250000;
+        let editModal = null;
+
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
+            toast.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function adminLogin() {
+            if (btoa(document.getElementById('adminPassword').value) === 'YWRtaW4xMjM=') {
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                loadAdminData();
+            } else {
+                showNotification('Mật khẩu không đúng!', 'warning');
+            }
+        }
+
+        async function loadAdminData() {
+            try {
+                const { data: orders, error } = await supabase.from('yearbook_orders').select('*').order('order_time', { ascending: false });
+                if (error) throw error;
+                
+                const totalRevenue = orders.reduce((sum, o) => sum + (o.quantity * BOOK_PRICE), 0);
+                document.getElementById('totalOrders').textContent = orders.length;
+                document.getElementById('totalBooks').textContent = orders.reduce((sum, o) => sum + o.quantity, 0);
+                document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('vi-VN');
+                document.getElementById('pendingCount').textContent = orders.filter(o => o.status !== 'Đã giao').length;
+
+                const tbody = document.getElementById('ordersList');
+                tbody.innerHTML = '';
+                orders.forEach((o, index) => {
+                    const totalAmount = o.quantity * BOOK_PRICE;
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${o.name}</td>
+                        <td>${o.phone}</td>
+                        <td>${o.email || 'N/A'}</td>
+                        <td class="text-center">${o.quantity}</td>
+                        <td>${totalAmount.toLocaleString('vi-VN')} VNĐ</td>
+                        <td>${new Date(o.order_time).toLocaleString('vi-VN')}</td>
+                        <td class="text-center"><input type="checkbox" class="form-check-input"></td>
+                        <td class="action-cell">
+                            <button class="btn btn-sm btn-outline-primary" onclick='openEditModal(${JSON.stringify(o)})' title="Sửa thông tin"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${o.id}, '${o.name}')" title="Xóa đơn"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    `;
+                });
+            } catch (error) {
+                showNotification(`Lỗi tải dữ liệu: ${error.message}`, 'danger');
+            }
+        }
+        
+        function openEditModal(order) {
+            document.getElementById('edit-id').value = order.id;
+            document.getElementById('edit-name').value = order.name;
+            document.getElementById('edit-phone').value = order.phone;
+            document.getElementById('edit-email').value = order.email || '';
+            document.getElementById('edit-quantity').value = order.quantity;
+            document.getElementById('edit-status').value = order.status || 'Chưa giao';
+            editModal.show();
+        }
+
+        async function saveChanges() {
+            const id = document.getElementById('edit-id').value;
+            const updatedData = {
+                name: document.getElementById('edit-name').value,
+                phone: document.getElementById('edit-phone').value,
+                email: document.getElementById('edit-email').value,
+                quantity: parseInt(document.getElementById('edit-quantity').value, 10),
+                status: document.getElementById('edit-status').value
+            };
+            const { error } = await supabase.from('yearbook_orders').update(updatedData).eq('id', id);
+            if (error) {
+                showNotification(`Lỗi cập nhật: ${error.message}`, 'danger');
+            } else {
+                showNotification('Cập nhật thành công!', 'success');
+                editModal.hide();
+                loadAdminData();
+            }
+        }
+
+        async function confirmDelete(id, name) {
+            if (confirm(`Bạn có chắc muốn xóa đơn hàng của "${name}" không?`)) {
+                const { error } = await supabase.from('yearbook_orders').delete().eq('id', id);
+                if (error) {
+                    showNotification(`Lỗi khi xóa: ${error.message}`, 'danger');
+                } else {
+                    showNotification('Đã xóa đơn hàng.', 'success');
+                    loadAdminData();
+                }
+            }
+        }
+
+        async function exportToExcel() {
+            showNotification('Đang chuẩn bị file export...', 'info');
+            const { data: orders, error } = await supabase.from('yearbook_orders').select('*').order('order_time');
+            if (error) return showNotification(`Lỗi export: ${error.message}`, 'danger');
+            
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += ["STT", "Họ tên", "Điện thoại", "Email", "Số Lượng", "Tổng tiền (VNĐ)", "Thời gian Đặt", "Ký nhận"].join(',') + '\r\n';
+            
+            orders.forEach((o, index) => {
+                const totalAmount = o.quantity * BOOK_PRICE;
+                const row = [
+                    index + 1,
+                    `"${o.name.replace(/"/g, '""')}"`,
+                    `="${o.phone}"`,
+                    o.email || 'N/A',
+                    o.quantity,
+                    totalAmount,
+                    new Date(o.order_time).toLocaleString('vi-VN'),
+                    "" // Cột trống để ký nhận
+                ];
+                csvContent += row.join(',') + '\r\n';
+            });
+
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "danh_sach_dat_ky_yeu.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        });
+    </script>
+</body>
+</html>
