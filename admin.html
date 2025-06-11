@@ -226,13 +226,37 @@
             }
         }
 
+        // === MODIFIED FUNCTION - START ===
         async function exportToExcel() {
             showNotification('Đang chuẩn bị file export...', 'info');
-            const { data: participants, error } = await supabase.from('attendees').select('*').order('registered_at');
-            if (error) return showNotification(`Lỗi export: ${error.message}`, 'danger');
+            
+            // Lấy toàn bộ dữ liệu từ Supabase
+            const { data: participants, error } = await supabase.from('attendees').select('*');
+            if (error) {
+                return showNotification(`Lỗi export: ${error.message}`, 'danger');
+            }
+
+            // Sắp xếp lại danh sách participants trong JavaScript
+            // Người đã check-in sẽ được đưa lên đầu
+            participants.sort((a, b) => {
+                // Nếu trạng thái check-in khác nhau, ưu tiên người đã check-in (true đứng trước)
+                if (a.checked_in !== b.checked_in) {
+                    return a.checked_in ? -1 : 1;
+                }
+                
+                // Nếu cả hai cùng trạng thái là Đã Check-in, sắp xếp theo thời gian check-in gần nhất
+                if (a.checked_in) { 
+                    return new Date(b.checkin_time) - new Date(a.checkin_time);
+                }
+
+                // Nếu cả hai cùng trạng thái là Chưa Check-in, sắp xếp theo thời gian đăng ký gần nhất
+                return new Date(b.registered_at) - new Date(a.registered_at);
+            });
             
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
             csvContent += ["STT", "Họ tên", "Email", "Điện thoại", "Công ty", "Trạng thái", "Thời gian Check-in"].join(',') + '\r\n';
+            
+            // Tạo nội dung CSV từ danh sách đã được sắp xếp
             participants.forEach((p, index) => {
                 const row = [
                     index + 1,
@@ -253,6 +277,8 @@
             link.click();
             document.body.removeChild(link);
         }
+        // === MODIFIED FUNCTION - END ===
+
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
