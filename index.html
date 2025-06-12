@@ -338,6 +338,7 @@
             showPage('success');
         }
 
+        // --- PLATFORM DETECTION & SAVE LOGIC ---
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
@@ -347,17 +348,24 @@
             return /Zalo|FBAN|FBAV|Twitter|Instagram/.test(userAgent);
         }
 
+        // === NEW: Click handler for the save button ===
         function handleSaveClick() {
             if (isIOS()) {
+                // Show a specific, longer notification for iOS users
                 showNotification('Mã QR đã được lưu vào ứng dụng Tệp (Files) trên iPhone của bạn.', 'info', 8000);
             } else {
+                // Standard notification for others
                 showNotification('Đã bắt đầu tải mã QR!', 'info');
             }
+            // The default download action of the <a> tag will proceed after this function.
         }
 
+        // --- QR SCANNING FLOW (Unchanged) ---
         function initiateScanPage() {
             const scanResultDiv = document.getElementById('scan-result');
-            if (scanResultDiv) scanResultDiv.innerHTML = '';
+            if (scanResultDiv) {
+                scanResultDiv.innerHTML = '';
+            }
             checkinSound.play().catch(e => {});
             checkinSound.pause();
             checkinSound.currentTime = 0;
@@ -365,7 +373,9 @@
         }
 
         function startQRScanner() {
-            if (html5QrcodeScanner && html5QrcodeScanner.isScanning) return;
+            if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+                return;
+            }
             html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: { width: 250, height: 250 } });
             html5QrcodeScanner.render(onScanSuccess, onScanError);
         }
@@ -424,17 +434,20 @@
                 if (html5QrcodeScanner) {
                     html5QrcodeScanner.clear().catch(err => console.error("Lỗi khi dọn dẹp scanner:", err));
                 }
-                showPage('success');
+                showPage('checkin-success');
 
             } catch (error) {
                 scanResultDiv.innerHTML = `<div class="alert alert-danger">Lỗi khi check-in: ${error.message}</div><button class="btn btn-info mt-2" onclick="initiateScanPage()">Quét Lại</button>`;
             }
         }
 
+        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
+            // Check for in-app browser and show warning if needed
             if (isInAppBrowser()) {
                 document.getElementById('in-app-browser-warning').style.display = 'block';
             }
+            
             showPage('register');
         });
     </script>
