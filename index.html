@@ -13,10 +13,10 @@
         .page { display: none; }
         .page.active { display: block; }
         .card { border: none; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
-        .navbar { background-color: #0d6efd; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .navbar { background-color: #198754; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .navbar .navbar-brand, .navbar .nav-link { color: #fff !important; font-weight: 500; }
         .navbar .nav-link .fas { margin-right: 5px; }
-        .register-header { background-color: #007bff; padding: 20px; border-top-left-radius: 15px; border-top-right-radius: 15px; }
+        .register-header { background-color: #198754; padding: 20px; border-top-left-radius: 15px; border-top-right-radius: 15px; }
         #qr-canvas { margin: 20px auto; display: block; border: 1px solid #eee; border-radius: 8px; }
         #in-app-browser-warning { display: none; position: sticky; top: 0; z-index: 1200; }
 
@@ -111,7 +111,7 @@
                                     <label for="company" class="form-label"><i class="fas fa-building me-2"></i>Công Ty/Tổ Chức</label>
                                     <input type="text" class="form-control" id="company" placeholder="Tên công ty (không bắt buộc)">
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 py-2 mt-3">
+                                <button type="submit" class="btn  w-100 py-2 mt-3" style="background-color: #198754; color: white;">
                                     <i class="fas fa-paper-plane me-2"></i>ĐĂNG KÝ NGAY
                                 </button>
                             </form>
@@ -130,15 +130,16 @@
                             <h4><i class="fas fa-check-circle"></i> Đăng Ký Thành Công!</h4>
                         </div>
                         <div class="card-body text-center">
-                            <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:</p>
+                            <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:<br><h4 style="color: red;">(Lưu ý: Vui lòng lưu mã QR code này để check-in vào ngày hội thảo!!!)</br></h4></p>
                             <canvas id="qr-canvas"></canvas>
                             <div id="userInfo" class="mt-3 p-3 bg-light rounded"></div>
-                            <a class="btn btn-primary mt-3" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
+                            <a class="btn  mt-3" style="background-color: #198754; color: white;" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
                                 <i class="fas fa-download"></i> Lưu QR Code
                             </a>
-                            <button class="btn btn-outline-primary mt-3 ms-2" onclick="showPage('register'); document.getElementById('registerForm').reset();">
+                            <button class="btn btn-outline-primary mt-3 ms-2" style="background-color: #198754; color: white;" onclick="showPage('register'); document.getElementById('registerForm').reset();">
                                 <i class="fas fa-plus"></i> Đăng Ký Mới
                             </button>
+                            
                         </div>
                     </div>
                 </div>

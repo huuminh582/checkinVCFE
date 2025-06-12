@@ -9,7 +9,7 @@
     <style>
         body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .card { border: none; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
-        .navbar { background: linear-gradient(90deg, #0d6efd, #4e8cff); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .navbar { background-color: #198754; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .navbar .navbar-brand, .navbar .nav-link { color: #fff !important; font-weight: 500; }
         .admin-stat-card { background: linear-gradient(135deg, #5b24ff, #8a6dff); color: white; border-radius: 12px; padding: 20px; }
         .admin-stat-card h1 { font-size: 2.5rem; font-weight: 700; }
@@ -47,7 +47,7 @@
                 <div class="card p-4 text-center">
                     <h4 class="mb-3"><i class="fas fa-shield-alt me-2"></i>Quản Trị Viên</h4>
                     <input type="password" class="form-control mb-3" id="adminPassword" placeholder="Mật khẩu admin">
-                    <button class="btn btn-primary w-100" onclick="adminLogin()">
+                    <button class="btn  w-100" style="background-color: #198754; color: white;" onclick="adminLogin()">
                         <i class="fas fa-sign-in-alt me-2"></i>Đăng Nhập
                     </button>
                 </div>
@@ -67,7 +67,7 @@
                     <div>
                         <button class="btn btn-light btn-sm" onclick="loadAdminData()"><i class="fas fa-sync-alt me-2"></i>Tải lại</button>
                         <button class="btn btn-light btn-sm ms-2" onclick="exportToExcel()"><i class="fas fa-file-excel me-2"></i>Xuất Excel</button>
-                        <button class="btn btn-danger btn-sm ms-2" onclick="confirmDeleteAll()"><i class="fas fa-trash-alt me-2"></i>Xóa Tất Cả</button>
+                        
                     </div>
                 </div>
                 <div class="table-responsive">
