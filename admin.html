@@ -17,7 +17,7 @@
         #admin .list-header { background-color: #198754; color: white; padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
         #admin .table thead th { font-weight: 600; }
         .btn-action { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
-        .action-cell { display: flex; justify-content: center; align-items: center; gap: 0.5rem; min-width: 90px; }
+        
         @media (max-width: 767px) { .admin-stat-card h1 { font-size: 2rem; } }
     </style>
 </head>
@@ -81,7 +81,7 @@
                                 <th>Công ty</th>
                                 <th>Thời gian ĐK</th>
                                 <th>Trạng thái</th>
-                                <th>Thao tác</th>
+                                
                             </tr>
                         </thead>
                         <tbody id="participantsList"></tbody>
@@ -189,47 +189,14 @@
                     deleteButton.title = 'Xóa';
                     deleteButton.onclick = () => confirmDelete(p.id, p.name);
 
-                    actionsCell.appendChild(editButton);
-                    actionsCell.appendChild(deleteButton);
+                    
                 });
             } catch (error) {
                 showNotification(`Lỗi tải dữ liệu: ${error.message}`, 'danger');
             }
         }
         
-        function openEditModal(participant) {
-            document.getElementById('edit-id').value = participant.id;
-            document.getElementById('edit-name').value = participant.name;
-            document.getElementById('edit-email').value = participant.email || '';
-            document.getElementById('edit-phone').value = participant.phone;
-            document.getElementById('edit-company').value = participant.company || '';
-            editModal.show();
-        }
-
-        async function saveChanges() {
-            const id = document.getElementById('edit-id').value;
-            const updatedData = { name: document.getElementById('edit-name').value, email: document.getElementById('edit-email').value, phone: document.getElementById('edit-phone').value, company: document.getElementById('edit-company').value };
-            const { error } = await supabase.from('attendees').update(updatedData).eq('id', id);
-            if (error) {
-                showNotification(`Lỗi khi cập nhật: ${error.message}`, 'danger');
-            } else {
-                showNotification('Cập nhật thành công!', 'success');
-                editModal.hide();
-                loadAdminData();
-            }
-        }
-
-        async function confirmDelete(id, name) {
-            if (confirm(`Bạn có chắc chắn muốn xóa người tham dự "${name}" không?`)) {
-                const { error } = await supabase.from('attendees').delete().eq('id', id);
-                if (error) {
-                    showNotification(`Lỗi khi xóa: ${error.message}`, 'danger');
-                } else {
-                    showNotification(`Đã xóa "${name}".`, 'success');
-                    loadAdminData();
-                }
-            }
-        }
+        
 
         async function exportToExcel() {
             showNotification('Đang chuẩn bị file export...', 'info');
@@ -260,30 +227,7 @@
             document.body.removeChild(link);
         }
 
-        function confirmDeleteAll() {
-            const confirmation = confirm("BẠN CÓ CHẮC CHẮN MUỐN XÓA TOÀN BỘ DỮ LIỆU KHÔNG?\nHành động này không thể hoàn tác!");
-            if (confirmation) {
-                const finalConfirmation = prompt("Đây là bước xác nhận cuối cùng. Vui lòng nhập 'XÓA' để tiếp tục.");
-                if (finalConfirmation === "XÓA") {
-                    deleteAllData();
-                } else {
-                    showNotification("Hủy bỏ thao tác xóa. Chuỗi xác nhận không đúng.", "info");
-                }
-            }
-        }
-
-        async function deleteAllData() {
-            showNotification("Đang xóa toàn bộ dữ liệu...", "warning");
-            try {
-                const { error } = await supabase.from('attendees').delete().gt('id', 0);
-                if (error) throw error;
-                
-                showNotification("Đã xóa toàn bộ dữ liệu thành công!", "success");
-                loadAdminData();
-            } catch (error) {
-                showNotification(`Lỗi khi xóa dữ liệu: ${error.message}`, "danger");
-            }
-        }
+        
 
         document.addEventListener('DOMContentLoaded', () => {
             editModal = new bootstrap.Modal(document.getElementById('editModal'));
