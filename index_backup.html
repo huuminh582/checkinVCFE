@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Check-in Hội Thảo</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
@@ -13,22 +13,46 @@
         .page { display: none; }
         .page.active { display: block; }
         .card { border: none; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
-        .navbar { background-color: #0d6efd; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .navbar { background-color: #198754; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .navbar .navbar-brand, .navbar .nav-link { color: #fff !important; font-weight: 500; }
         .navbar .nav-link .fas { margin-right: 5px; }
-        .register-header { background-color: #007bff; padding: 20px; }
+        .register-header { background-color: #198754; padding: 20px; border-top-left-radius: 15px; border-top-right-radius: 15px; }
         #qr-canvas { margin: 20px auto; display: block; border: 1px solid #eee; border-radius: 8px; }
-        /* === NEW: Style for the in-app browser warning === */
-        #in-app-browser-warning {
-            display: none; /* Hidden by default */
-            position: sticky;
-            top: 0;
-            z-index: 1200;
+        #in-app-browser-warning { display: none; position: sticky; top: 0; z-index: 1200; }
+
+        /* --- CSS CHO VALIDATION --- */
+        .form-group {
+            position: relative;
+        }
+        .invalid-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #dc3545;
+            display: none; /* Ẩn mặc định */
+        }
+        .form-control.is-invalid {
+            padding-right: 2.5rem; /* Tạo không gian cho icon */
+            border-color: #dc3545;
+        }
+        .form-control.is-invalid + .invalid-icon {
+            display: block; /* Hiện icon khi có lỗi */
+        }
+        .invalid-feedback {
+            display: none; /* Ẩn feedback mặc định của Bootstrap */
+            width: 100%;
+            margin-top: .25rem;
+            font-size: .875em;
+            color: #dc3545;
+        }
+        .form-control.is-invalid ~ .invalid-feedback {
+            display: block; /* Hiện feedback khi có lỗi */
         }
     </style>
 </head>
 <body>
-    <!-- === NEW: In-app browser warning bar === -->
+    <!-- In-app browser warning bar -->
     <div id="in-app-browser-warning" class="alert alert-warning text-center mb-0 p-2" role="alert">
         <i class="fas fa-exclamation-triangle"></i> Để có trải nghiệm tốt nhất, vui lòng mở bằng trình duyệt Safari hoặc Chrome.
     </div>
@@ -55,7 +79,7 @@
 
     <div class="container mt-4">
         <!-- Trang Đăng Ký -->
-        <div id="register" class="page">
+        <div id="register" class="page active">
              <div class="row justify-content-center mt-5">
                 <div class="col-lg-6 col-md-8">
                     <div class="card">
@@ -64,24 +88,30 @@
                             <p class="mb-0" style="font-size: 0.9rem;">Vui lòng điền thông tin của bạn</p>
                         </div>
                         <div class="card-body p-4">
-                            <form id="registerForm">
-                                <div class="mb-3">
+                            <form id="registerForm" novalidate>
+                                <div class="mb-3 form-group">
                                     <label for="name" class="form-label"><i class="fas fa-user me-2"></i>Họ và tên</label>
-                                    <input type="text" class="form-control" id="name" placeholder="Nhập họ và tên của bạn" required>
+                                    <input type="text" class="form-control" id="name" placeholder="Nhập họ và tên đầy đủ">
+                                    <i class="fas fa-exclamation-circle invalid-icon"></i>
+                                    <div class="invalid-feedback">Vui lòng nhập họ và tên.</div>
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3 form-group">
                                     <label for="email" class="form-label"><i class="fas fa-envelope me-2"></i>Email</label>
-                                    <input type="email" class="form-control" id="email" placeholder="Nhập địa chỉ email">
+                                    <input type="email" class="form-control" id="email" placeholder="example@email.com">
+                                    <i class="fas fa-exclamation-circle invalid-icon"></i>
+                                    <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3 form-group">
                                      <label for="phone" class="form-label"><i class="fas fa-phone me-2"></i>Số điện thoại</label>
-                                     <input type="tel" class="form-control" id="phone" placeholder="Nhập số điện thoại" required>
+                                     <input type="tel" class="form-control" id="phone" placeholder="0123456789">
+                                     <i class="fas fa-exclamation-circle invalid-icon"></i>
+                                     <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-11 số).</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="company" class="form-label"><i class="fas fa-building me-2"></i>Công Ty/Tổ Chức</label>
-                                    <input type="text" class="form-control" id="company" placeholder="Nhập công ty/tổ chức">
+                                    <input type="text" class="form-control" id="company" placeholder="Tên công ty (không bắt buộc)">
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 py-2 mt-3">
+                                <button type="submit" class="btn  w-100 py-2 mt-3" style="background-color: #198754; color: white;">
                                     <i class="fas fa-paper-plane me-2"></i>ĐĂNG KÝ NGAY
                                 </button>
                             </form>
@@ -100,23 +130,23 @@
                             <h4><i class="fas fa-check-circle"></i> Đăng Ký Thành Công!</h4>
                         </div>
                         <div class="card-body text-center">
-                            <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:</p>
+                            <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:<br><h4 style="color: red;">(Lưu ý: Vui lòng lưu mã QR code này để check-in vào ngày hội thảo!!!)</br></h4></p>
                             <canvas id="qr-canvas"></canvas>
                             <div id="userInfo" class="mt-3 p-3 bg-light rounded"></div>
-                            <!-- === MODIFIED: Added onclick handler for custom notifications === -->
-                            <a class="btn btn-primary mt-3" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
+                            <a class="btn  mt-3" style="background-color: #198754; color: white;" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
                                 <i class="fas fa-download"></i> Lưu QR Code
                             </a>
-                            <button class="btn btn-outline-primary mt-3 ms-2" onclick="showPage('register'); document.getElementById('registerForm').reset();">
+                            <button class="btn btn-outline-primary mt-3 ms-2" style="background-color: #198754; color: white;" onclick="showPage('register'); document.getElementById('registerForm').reset();">
                                 <i class="fas fa-plus"></i> Đăng Ký Mới
                             </button>
+                            
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Các trang khác giữ nguyên -->
+        <!-- Trang Quét Mã QR -->
         <div id="scan" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-8">
@@ -132,6 +162,8 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Trang Check-in Thành Công -->
         <div id="checkin-success" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -163,7 +195,6 @@
         let currentUser = null;
         let html5QrcodeScanner = null;
 
-        // --- UTILITY FUNCTIONS ---
         function showNotification(message, type = 'info', duration = 5000) {
             const container = document.getElementById('notification-container');
             const toast = document.createElement('div');
@@ -187,58 +218,84 @@
             }
         }
 
-        // --- REGISTRATION FLOW ---
-        // === MODIFIED FUNCTION - START ===
+        function validateForm() {
+            let isValid = true;
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+
+            const setError = (input, message) => {
+                input.classList.add('is-invalid');
+                const feedback = input.parentElement.querySelector('.invalid-feedback');
+                if (feedback) feedback.textContent = message;
+                isValid = false;
+            };
+
+            const clearError = (input) => {
+                input.classList.remove('is-invalid');
+            };
+
+            [nameInput, emailInput, phoneInput].forEach(clearError);
+
+            // 1. Kiểm tra Họ và tên
+            if (nameInput.value.trim() === '') {
+                setError(nameInput, 'Vui lòng nhập họ và tên.');
+            }
+
+            // 2. Kiểm tra Email (bắt buộc)
+            const emailValue = emailInput.value.trim();
+            if (emailValue === '') {
+                setError(emailInput, 'Vui lòng nhập địa chỉ email.');
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+                setError(emailInput, 'Vui lòng nhập email hợp lệ.');
+            }
+
+            // 3. Kiểm tra Số điện thoại (10-11 số)
+            const phoneValue = phoneInput.value.trim();
+            const phoneRegex = /^0\d{9,10}$/;
+            if (phoneValue === '') {
+                setError(phoneInput, 'Vui lòng nhập số điện thoại.');
+            } else if (!phoneRegex.test(phoneValue)) {
+                setError(phoneInput, 'Vui lòng nhập số điện thoại hợp lệ (10-11 số).');
+            }
+
+            return isValid;
+        }
+
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
 
             try {
                 const phone = document.getElementById('phone').value.trim();
-                const name = document.getElementById('name').value;
-                const email = document.getElementById('email').value || null;
-                const company = document.getElementById('company').value || null;
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim(); // Email giờ là bắt buộc
+                const company = document.getElementById('company').value.trim() || null;
 
-                // BƯỚC 1: KIỂM TRA SỐ ĐIỆN THOẠI ĐÃ TỒN TẠI CHƯA
                 const { data: existingParticipant, error: checkError } = await supabase
                     .from('attendees')
-                    .select('id, name') // Chỉ cần lấy id, name để kiểm tra và thông báo
+                    .select('id, name')
                     .eq('phone', phone)
                     .single();
 
-                // Bỏ qua lỗi 'PGRST116' vì nó chỉ có nghĩa là "không tìm thấy hàng nào", đó là điều chúng ta muốn
-                if (checkError && checkError.code !== 'PGRST116') {
-                    throw checkError; // Ném ra các lỗi không mong muốn khác (vd: mất kết nối)
-                }
+                if (checkError && checkError.code !== 'PGRST116') throw checkError;
 
-                // BƯỚC 2: NẾU TÌM THẤY, BÁO LỖI VÀ DỪNG LẠI
                 if (existingParticipant) {
-                    showNotification(`Số điện thoại ${phone} đã được đăng ký cho "${existingParticipant.name}". Vui lòng kiểm tra lại.`, 'warning', 7000);
-                    // Dừng hàm tại đây, không cần ném lỗi
+                    showNotification(`Số điện thoại ${phone} đã được đăng ký cho "${existingParticipant.name}".`, 'warning', 7000);
                     return; 
                 }
 
-                // BƯỚC 3: NẾU KHÔNG TRÙNG, TIẾN HÀNH ĐĂNG KÝ
-                const payload = { 
-                    name: name, 
-                    phone: phone, 
-                    email: email, 
-                    company: company, 
-                    registered_at: new Date().toISOString(), 
-                    checked_in: false, 
-                    checkin_time: null 
-                };
+                const payload = { name, phone, email, company, registered_at: new Date().toISOString(), checked_in: false, checkin_time: null };
+                const { data: insertedData, error: insertError } = await supabase.from('attendees').insert([payload]).select();
 
-                const { data: insertedData, error: insertError } = await supabase
-                    .from('attendees')
-                    .insert([payload])
-                    .select();
-
-                if (insertError) {
-                    throw insertError; // Ném lỗi nếu việc thêm mới thất bại
-                }
+                if (insertError) throw insertError;
                 
                 currentUser = insertedData[0];
                 showNotification('Đăng ký thành công!', 'success');
@@ -250,12 +307,10 @@
                 console.error('Registration Error:', error);
                 showNotification(`Lỗi đăng ký: ${error.message}`, 'danger');
             } finally {
-                // Luôn luôn kích hoạt lại nút bấm sau khi xử lý xong
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>ĐĂNG KÝ NGAY';
             }
         });
-        // === MODIFIED FUNCTION - END ===
 
         function generateQR(userData) {
             return new Promise((resolve, reject) => {
