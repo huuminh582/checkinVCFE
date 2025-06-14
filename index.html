@@ -65,31 +65,11 @@
                         </div>
                         <div class="card-body p-4">
                             <form id="registerForm" novalidate>
-                                <div class="mb-3 form-group">
-                                    <label for="name" class="form-label"><i class="fas fa-user me-2"></i>Họ và tên</label>
-                                    <input type="text" class="form-control" id="name" placeholder="Nhập họ và tên đầy đủ">
-                                    <i class="fas fa-exclamation-circle invalid-icon"></i>
-                                    <div class="invalid-feedback">Vui lòng nhập họ và tên.</div>
-                                </div>
-                                <div class="mb-3 form-group">
-                                    <label for="email" class="form-label"><i class="fas fa-envelope me-2"></i>Email</label>
-                                    <input type="email" class="form-control" id="email" placeholder="example@email.com">
-                                    <i class="fas fa-exclamation-circle invalid-icon"></i>
-                                    <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
-                                </div>
-                                <div class="mb-3 form-group">
-                                     <label for="phone" class="form-label"><i class="fas fa-phone me-2"></i>Số điện thoại</label>
-                                     <input type="tel" class="form-control" id="phone" placeholder="0123456789">
-                                     <i class="fas fa-exclamation-circle invalid-icon"></i>
-                                     <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-11 số).</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="company" class="form-label"><i class="fas fa-building me-2"></i>Công Ty/Tổ Chức</label>
-                                    <input type="text" class="form-control" id="company" placeholder="Tên công ty (không bắt buộc)">
-                                </div>
-                                <button type="submit" class="btn w-100 py-2 mt-3" style="background-color: #198754; color: white;">
-                                    <i class="fas fa-paper-plane me-2"></i>ĐĂNG KÝ NGAY
-                                </button>
+                                <div class="mb-3 form-group"><label for="name" class="form-label"><i class="fas fa-user me-2"></i>Họ và tên</label><input type="text" class="form-control" id="name" placeholder="Nhập họ và tên đầy đủ"><i class="fas fa-exclamation-circle invalid-icon"></i><div class="invalid-feedback">Vui lòng nhập họ và tên.</div></div>
+                                <div class="mb-3 form-group"><label for="email" class="form-label"><i class="fas fa-envelope me-2"></i>Email</label><input type="email" class="form-control" id="email" placeholder="example@email.com"><i class="fas fa-exclamation-circle invalid-icon"></i><div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div></div>
+                                <div class="mb-3 form-group"><label for="phone" class="form-label"><i class="fas fa-phone me-2"></i>Số điện thoại</label><input type="tel" class="form-control" id="phone" placeholder="0123456789"><i class="fas fa-exclamation-circle invalid-icon"></i><div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-11 số).</div></div>
+                                <div class="mb-3"><label for="company" class="form-label"><i class="fas fa-building me-2"></i>Công Ty/Tổ Chức</label><input type="text" class="form-control" id="company" placeholder="Tên công ty (không bắt buộc)"></div>
+                                <button type="submit" class="btn w-100 py-2 mt-3" style="background-color: #198754; color: white;"><i class="fas fa-paper-plane me-2"></i>ĐĂNG KÝ NGAY</button>
                             </form>
                         </div>
                     </div>
@@ -98,28 +78,7 @@
         </div>
 
         <!-- Trang Thành Công với QR -->
-        <div id="success" class="page">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-success text-white text-center">
-                            <h4><i class="fas fa-check-circle"></i> Đăng Ký Thành Công!</h4>
-                        </div>
-                        <div class="card-body text-center">
-                            <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:<br><h4 style="color: red;">(Lưu ý: Vui lòng lưu mã QR code này để check-in vào ngày hội thảo!!!)</br></h4></p>
-                            <canvas id="qr-canvas"></canvas>
-                            <div id="userInfo" class="mt-3 p-3 bg-light rounded"></div>
-                            <a class="btn mt-3" style="background-color: #198754; color: white;" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
-                                <i class="fas fa-download"></i> Lưu QR Code
-                            </a>
-                            <button class="btn btn-outline-primary mt-3 ms-2" style="background-color: #198754; color: white;" onclick="showPage('register'); document.getElementById('registerForm').reset();">
-                                <i class="fas fa-plus"></i> Đăng Ký Mới
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="success" class="page"><div class="row justify-content-center"><div class="col-md-6"><div class="card"><div class="card-header bg-success text-white text-center"><h4><i class="fas fa-check-circle"></i> Đăng Ký Thành Công!</h4></div><div class="card-body text-center"><p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:<br><h4 style="color: red;">(Lưu ý: Vui lòng lưu mã QR code này để check-in vào ngày hội thảo!!!)</br></h4></p><canvas id="qr-canvas"></canvas><div id="userInfo" class="mt-3 p-3 bg-light rounded"></div><a class="btn mt-3" style="background-color: #198754; color: white;" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()"><i class="fas fa-download"></i> Lưu QR Code</a><button class="btn btn-outline-primary mt-3 ms-2" style="background-color: #198754; color: white;" onclick="showPage('register'); document.getElementById('registerForm').reset();"><i class="fas fa-plus"></i> Đăng Ký Mới</button></div></div></div></div></div>
 
         <!-- Trang Quét Mã QR -->
         <div id="scan" class="page">
@@ -137,18 +96,20 @@
             </div>
         </div>
         
-        <!-- Trang Check-in Thành Công -->
+        <!-- Trang Check-in Thành Công (GIAO DIỆN MỚI) -->
         <div id="checkin-success" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-success text-white text-center">
-                            <h4><i class="fas fa-check-double"></i> Check-in Thành Công!</h4>
+                    <div class="card overflow-hidden">
+                        <div class="card-header text-white text-center" style="background-color: #198754;">
+                            <h4><i class="fas fa-user-check me-2"></i>Check-in Thành Công!</h4>
                         </div>
-                        <div class="card-body text-center">
-                            <div id="checkinInfo"></div>
-                            <button class="btn btn-primary mt-3" onclick="initiateScanPage()">
-                                <i class="fas fa-qrcode"></i> Quét Tiếp
+                        <div class="card-body p-3">
+                            <div id="checkinInfo">
+                                <!-- Nội dung check-in sẽ được chèn vào đây -->
+                            </div>
+                            <button class="btn  w-100 mt-3" style="background-color: #198754; color: white;" onclick="initiateScanPage()">
+                                <i class="fas fa-qrcode me-2"></i>Quét Tiếp
                             </button>
                         </div>
                     </div>
@@ -165,9 +126,7 @@
                     <h5 class="modal-title" id="qrErrorModalLabel"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Thông Báo</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="initiateScanPage()"></button>
                 </div>
-                <div class="modal-body" id="qrErrorModalBody">
-                    <!-- Nội dung lỗi sẽ được chèn vào đây bằng JavaScript -->
-                </div>
+                <div class="modal-body" id="qrErrorModalBody"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="initiateScanPage()">
                         <i class="fas fa-qrcode me-2"></i>Quét Lại
@@ -408,20 +367,39 @@
                 checkinSound.play();
                 
                 const checkinInfoDiv = document.getElementById('checkinInfo');
-                const guestTypeDisplay = participant.guest_type === 'VIP'
-                    ? `<strong class="text-danger"><i class="fas fa-star me-2"></i>VIP</strong>`
-                    : (participant.guest_type || 'Thường');
+                
+                // --- LOGIC MỚI CHO BADGE ---
+                const guestTypeDisplay = (participant.guest_type === 'VIP')
+                    ? '<span class="badge rounded-pill bg-danger">VIP</span>'
+                    : '<span class="badge rounded-pill bg-success">Vãng lai</span>';
 
+                // --- GIAO DIỆN MỚI VỚI ICON TRẮNG TRÊN NỀN TỐI ---
                 checkinInfoDiv.innerHTML = `
-                    <div class="alert alert-success text-start">
-                        <h5 class="text-center"><i class="fas fa-user-check"></i> ${participant.name}</h5>
-                        <hr>
-                        <p><strong><i class="fas fa-user-tag me-2"></i>Loại khách:</strong> ${guestTypeDisplay}</p>
-                        <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> ${participant.email || 'N/A'}</p>
-                        <p><strong><i class="fas fa-phone me-2"></i>Điện thoại:</strong> ${participant.phone}</p>
-                        <p><strong><i class="fas fa-building me-2"></i>Công ty:</strong> ${participant.company || 'N/A'}</p>
-                        <hr>
-                        <p class="text-center mb-0">Check-in thành công lúc ${checkinTime.toLocaleString('vi-VN')}</p>
+                    <div class="text-black" style="background-color: white; border-radius: .5rem; padding: 1.25rem;">
+                        <div class="text-center mb-3">
+                            <h3 class="fw-light mb-0"><i class="fa-regular fa-circle-user me-2"></i>${participant.name}</h3>
+                        </div>
+                        <hr style="opacity: 0.25;">
+                        <div class="text-start">
+                            <p class="mb-2">
+                                <i class="fa-regular fa-envelope fa-fw me-2"></i>
+                                <strong>Email:</strong> ${participant.email || 'N/A'}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>
+                                <strong>Điện thoại:</strong> ${participant.phone}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fa-regular fa-building fa-fw me-2"></i>
+                                <strong>Công ty:</strong> ${participant.company || 'N/A'}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fa-regular fa-user fa-fw me-2"></i>
+                                <strong>Loại khách:</strong> ${guestTypeDisplay}
+                            </p>
+                        </div>
+                        <hr style="opacity: 0.25;">
+                        <p class="text-center text-white-50 small mb-0">Check-in thành công lúc ${checkinTime.toLocaleString('vi-VN')}</p>
                     </div>
                 `;
                 
