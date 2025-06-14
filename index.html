@@ -65,11 +65,31 @@
                         </div>
                         <div class="card-body p-4">
                             <form id="registerForm" novalidate>
-                                <div class="mb-3 form-group"><label for="name" class="form-label"><i class="fas fa-user me-2"></i>Họ và tên</label><input type="text" class="form-control" id="name" placeholder="Nhập họ và tên đầy đủ"><i class="fas fa-exclamation-circle invalid-icon"></i><div class="invalid-feedback">Vui lòng nhập họ và tên.</div></div>
-                                <div class="mb-3 form-group"><label for="email" class="form-label"><i class="fas fa-envelope me-2"></i>Email</label><input type="email" class="form-control" id="email" placeholder="example@email.com"><i class="fas fa-exclamation-circle invalid-icon"></i><div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div></div>
-                                <div class="mb-3 form-group"><label for="phone" class="form-label"><i class="fas fa-phone me-2"></i>Số điện thoại</label><input type="tel" class="form-control" id="phone" placeholder="0123456789"><i class="fas fa-exclamation-circle invalid-icon"></i><div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-11 số).</div></div>
-                                <div class="mb-3"><label for="company" class="form-label"><i class="fas fa-building me-2"></i>Công Ty/Tổ Chức</label><input type="text" class="form-control" id="company" placeholder="Tên công ty"></div>
-                                <button type="submit" class="btn w-100 py-2 mt-3" style="background-color: #198754; color: white;"><i class="fas fa-paper-plane me-2"></i>ĐĂNG KÝ NGAY</button>
+                                <div class="mb-3 form-group">
+                                    <label for="name" class="form-label"><i class="fas fa-user me-2"></i>Họ và tên</label>
+                                    <input type="text" class="form-control" id="name" placeholder="Nhập họ và tên đầy đủ">
+                                    <i class="fas fa-exclamation-circle invalid-icon"></i>
+                                    <div class="invalid-feedback">Vui lòng nhập họ và tên.</div>
+                                </div>
+                                <div class="mb-3 form-group">
+                                    <label for="email" class="form-label"><i class="fas fa-envelope me-2"></i>Email</label>
+                                    <input type="email" class="form-control" id="email" placeholder="example@email.com">
+                                    <i class="fas fa-exclamation-circle invalid-icon"></i>
+                                    <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                                </div>
+                                <div class="mb-3 form-group">
+                                     <label for="phone" class="form-label"><i class="fas fa-phone me-2"></i>Số điện thoại</label>
+                                     <input type="tel" class="form-control" id="phone" placeholder="0123456789">
+                                     <i class="fas fa-exclamation-circle invalid-icon"></i>
+                                     <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-11 số).</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="company" class="form-label"><i class="fas fa-building me-2"></i>Công Ty/Tổ Chức</label>
+                                    <input type="text" class="form-control" id="company" placeholder="Tên công ty">
+                                </div>
+                                <button type="submit" class="btn w-100 py-2 mt-3" style="background-color: #198754; color: white;">
+                                    <i class="fas fa-paper-plane me-2"></i>ĐĂNG KÝ NGAY
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -78,7 +98,28 @@
         </div>
 
         <!-- Trang Thành Công với QR -->
-        <div id="success" class="page"><div class="row justify-content-center"><div class="col-md-6"><div class="card"><div class="card-header bg-success text-white text-center"><h4><i class="fas fa-check-circle"></i> Đăng Ký Thành Công!</h4></div><div class="card-body text-center"><p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:<br><h4 style="color: red;">(Lưu ý: Vui lòng lưu mã QR code này để check-in vào ngày hội thảo!!!)</br></h4></p><canvas id="qr-canvas"></canvas><div id="userInfo" class="mt-3 p-3 bg-light rounded"></div><a class="btn mt-3" style="background-color: #198754; color: white;" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()"><i class="fas fa-download"></i> Lưu QR Code</a><button class="btn btn-outline-primary mt-3 ms-2" style="background-color: #198754; color: white;" onclick="showPage('register'); document.getElementById('registerForm').reset();"><i class="fas fa-plus"></i> Đăng Ký Mới</button></div></div></div></div></div>
+        <div id="success" class="page">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h4><i class="fas fa-check-circle"></i> Đăng Ký Thành Công!</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:<br><h4 style="color: red;">(Lưu ý: Vui lòng lưu mã QR code này để check-in vào ngày hội thảo!!!)</br></h4></p>
+                            <canvas id="qr-canvas"></canvas>
+                            <div id="userInfo" class="mt-3 p-3 bg-light rounded"></div>
+                            <a class="btn mt-3" style="background-color: #198754; color: white;" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
+                                <i class="fas fa-download"></i> Lưu QR Code
+                            </a>
+                            <button class="btn btn-outline-primary mt-3 ms-2" style="background-color: #198754; color: white;" onclick="showPage('register'); document.getElementById('registerForm').reset();">
+                                <i class="fas fa-plus"></i> Đăng Ký Mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Trang Quét Mã QR -->
         <div id="scan" class="page">
@@ -149,7 +190,7 @@
         let currentUser = null;
         let html5QrcodeScanner = null;
         let qrErrorModal = null;
-        let isProcessing = false; // Cờ để chống lỗi quét 2 lần
+        let isProcessing = false;
 
         function showQrErrorModal(message) {
             const modalBody = document.getElementById('qrErrorModalBody');
@@ -185,31 +226,25 @@
             const nameInput = document.getElementById('name');
             const emailInput = document.getElementById('email');
             const phoneInput = document.getElementById('phone');
-
             const setError = (input, message) => {
                 input.classList.add('is-invalid');
                 const feedback = input.parentElement.querySelector('.invalid-feedback');
                 if (feedback) feedback.textContent = message;
                 isValid = false;
             };
-
             const clearError = (input) => {
                 input.classList.remove('is-invalid');
             };
-
             [nameInput, emailInput, phoneInput].forEach(clearError);
-
             if (nameInput.value.trim() === '') {
                 setError(nameInput, 'Vui lòng nhập họ và tên.');
             }
-
             const emailValue = emailInput.value.trim();
             if (emailValue === '') {
                 setError(emailInput, 'Vui lòng nhập địa chỉ email.');
             } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
                 setError(emailInput, 'Vui lòng nhập email hợp lệ.');
             }
-
             const phoneValue = phoneInput.value.trim();
             const phoneRegex = /^0\d{9,10}$/;
             if (phoneValue === '') {
@@ -217,51 +252,47 @@
             } else if (!phoneRegex.test(phoneValue)) {
                 setError(phoneInput, 'Vui lòng nhập số điện thoại hợp lệ (10-11 số).');
             }
-
             return isValid;
         }
 
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
             if (!validateForm()) {
                 return;
             }
-
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-
             try {
                 const phone = document.getElementById('phone').value.trim();
                 const name = document.getElementById('name').value.trim();
                 const email = document.getElementById('email').value.trim();
                 const company = document.getElementById('company').value.trim() || null;
-
-                const { data: existingParticipant, error: checkError } = await supabase
-                    .from('attendees')
-                    .select('id, name')
-                    .eq('phone', phone)
-                    .single();
-
+                const { data: existingParticipant, error: checkError } = await supabase.from('attendees').select('id, name').eq('phone', phone).single();
                 if (checkError && checkError.code !== 'PGRST116') throw checkError;
-
                 if (existingParticipant) {
                     showNotification(`Số điện thoại ${phone} đã được đăng ký cho "${existingParticipant.name}".`, 'warning', 7000);
-                    return; 
+                    return;
                 }
-
-                const payload = { name, phone, email, company, registered_at: new Date().toISOString(), checked_in: false, checkin_time: null };
-                const { data: insertedData, error: insertError } = await supabase.from('attendees').insert([payload]).select();
-
-                if (insertError) throw insertError;
                 
+                // SỬA LỖI Ở ĐÂY: Thêm guest_type mặc định khi đăng ký
+                const payload = { 
+                    name, 
+                    phone, 
+                    email, 
+                    company, 
+                    guest_type: 'Thường', // Gán mặc định là 'Thường'
+                    registered_at: new Date().toISOString(), 
+                    checked_in: false, 
+                    checkin_time: null 
+                };
+
+                const { data: insertedData, error: insertError } = await supabase.from('attendees').insert([payload]).select();
+                if (insertError) throw insertError;
                 currentUser = insertedData[0];
                 showNotification('Đăng ký thành công!', 'success');
-                
                 await generateQR(currentUser);
                 showSuccessPage(currentUser);
-
             } catch (error) {
                 console.error('Registration Error:', error);
                 showNotification(`Lỗi đăng ký: ${error.message}`, 'danger');
@@ -275,14 +306,12 @@
             return new Promise((resolve, reject) => {
                 const canvas = document.getElementById('qr-canvas');
                 const qrData = JSON.stringify({ id: userData.id, name: userData.name, phone: userData.phone });
-                
                 QRCode.toCanvas(canvas, qrData, { width: 200, height: 200 }, function (error) {
                     if (error) {
                         console.error(error);
                         reject(error);
                         return;
                     }
-                    
                     const downloadLink = document.getElementById('saveQrButton');
                     if (downloadLink) {
                         downloadLink.href = canvas.toDataURL('image/png');
@@ -316,7 +345,7 @@
         }
 
         function initiateScanPage() {
-            isProcessing = false; // Mở khóa xử lý cho lần quét tiếp theo
+            isProcessing = false;
             checkinSound.play().catch(e => {});
             checkinSound.pause();
             checkinSound.currentTime = 0;
@@ -333,10 +362,9 @@
 
         function onScanSuccess(decodedText, decodedResult) {
             if (isProcessing) {
-                return; // Nếu đang xử lý, bỏ qua các lần quét tiếp theo
+                return;
             }
-            isProcessing = true; // Khóa xử lý lại
-
+            isProcessing = true;
             if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
                 html5QrcodeScanner.pause(true);
             }
@@ -375,9 +403,17 @@
                 
                 const checkinInfoDiv = document.getElementById('checkinInfo');
                 
-                const guestTypeDisplay = (participant.guest_type === 'VIP')
-                    ? '<span class="badge rounded-pill bg-danger">VIP</span>'
-                    : '<span class="badge rounded-pill" style="background-color: #198754;">Vãng lai</span>';
+                let guestTypeDisplay;
+                switch (participant.guest_type) {
+                    case 'VIP':
+                        guestTypeDisplay = '<span class="badge rounded-pill bg-danger">VIP</span>';
+                        break;
+                    case 'Khách quen':
+                        guestTypeDisplay = '<span class="badge rounded-pill bg-primary">Khách quen</span>';
+                        break;
+                    default:
+                        guestTypeDisplay = '<span class="badge rounded-pill" style="background-color: #198754;">Vãng lai</span>';
+                }
 
                 checkinInfoDiv.innerHTML = `
                     <div style="background-color: white; border: 1px solid #e9ecef; border-radius: .5rem; padding: 1.25rem;">
@@ -422,9 +458,7 @@
             if (isInAppBrowser()) {
                 document.getElementById('in-app-browser-warning').style.display = 'block';
             }
-            
             qrErrorModal = new bootstrap.Modal(document.getElementById('qrErrorModal'));
-
             showPage('register');
         });
     </script>

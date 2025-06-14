@@ -123,13 +123,7 @@
 
         async function loadAdminData() {
             try {
-                const { data: participants, error } = await supabase
-                    .from('attendees')
-                    .select('*')
-                    .order('checked_in', { ascending: false })
-                    .order('checkin_time', { ascending: false, nullsFirst: false })
-                    .order('registered_at', { ascending: false });
-
+                const { data: participants, error } = await supabase.from('attendees').select('*').order('registered_at', { ascending: false });
                 if (error) throw error;
                 
                 const total = participants.length;
@@ -144,7 +138,19 @@
                 participants.forEach((p, index) => {
                     const row = tbody.insertRow();
                     
-                    const isVip = p.guest_type === 'VIP';
+                    function getGuestTypeOptions(currentType) {
+                        const options = [
+                            { value: 'Thường', text: 'Vãng lai' },
+                            { value: 'VIP', text: 'VIP' },
+                            // { value: 'Khách quen', text: 'Khách quen' },
+                            // Để thêm loại khách mới, chỉ cần thêm một dòng ở đây
+                            // Ví dụ: { value: 'Đối tác', text: 'Đối tác' }
+                        ];
+
+                        return options.map(opt => 
+                            `<option value="${opt.value}" ${currentType === opt.value ? 'selected' : ''}>${opt.text}</option>`
+                        ).join('');
+                    }
 
                     row.innerHTML = `
                         <td>${index + 1}</td>
@@ -154,8 +160,7 @@
                         <td>${p.company || 'N/A'}</td>
                         <td>
                             <select class="form-select form-select-sm guest-type-select" onchange="updateGuestType(this, '${p.id}')">
-                                <option value="Thường" ${!isVip ? 'selected' : ''}>Vãng lai</option>
-                                <option value="VIP" ${isVip ? 'selected' : ''}>VIP</option>
+                                ${getGuestTypeOptions(p.guest_type)}
                             </select>
                         </td>
                         <td>${new Date(p.registered_at).toLocaleString('vi-VN')}</td>
@@ -169,15 +174,9 @@
         
         async function updateGuestType(selectElement, participantId) {
             const newType = selectElement.value;
-            
             try {
-                const { error } = await supabase
-                    .from('attendees')
-                    .update({ guest_type: newType })
-                    .eq('id', participantId);
-
+                const { error } = await supabase.from('attendees').update({ guest_type: newType }).eq('id', participantId);
                 if (error) throw error;
-
                 showNotification('Cập nhật loại khách thành công!', 'success');
             } catch (error) {
                 showNotification(`Lỗi cập nhật: ${error.message}`, 'danger');
@@ -194,8 +193,16 @@
             csvContent += ["STT", "Họ tên", "Email", "Điện thoại", "Công ty", "Loại khách", "Thời gian Đăng ký", "Trạng thái", "Thời gian Check-in"].join(',') + '\r\n';
             
             participants.forEach((p, index) => {
-                // --- LOGIC ĐÃ ĐƯỢC SỬA Ở ĐÂY ---
-                const guestTypeForExport = p.guest_type === 'VIP' ? 'VIP' : 'Vãng lai';
+                let guestTypeForExport;
+                if (p.guest_type === 'VIP') {
+                    guestTypeForExport = 'VIP';
+                } else if (p.guest_type === 'Khách quen') {
+                    guestTypeForExport = 'Khách quen';
+                // Để thêm loại khách mới, chỉ cần thêm một dòng else if ở đây
+                // else if (p.guest_type === 'Đối tác') { guestTypeForExport = 'Đối tác'; }
+                } else {
+                    guestTypeForExport = 'Vãng lai';
+                }
 
                 const row = [
                     index + 1,
@@ -203,7 +210,7 @@
                     p.email || 'N/A',
                     `="${p.phone}"`,
                     `"${(p.company || 'N/A').replace(/"/g, '""')}"`,
-                    guestTypeForExport, // Sử dụng biến đã được xử lý
+                    guestTypeForExport,
                     new Date(p.registered_at).toLocaleString('vi-VN'),
                     p.checked_in ? "Đã Check-in" : "Chưa Check-in",
                     p.checkin_time ? new Date(p.checkin_time).toLocaleString('vi-VN') : "N/A"
