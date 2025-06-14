@@ -19,36 +19,12 @@
         .register-header { background-color: #198754; padding: 20px; border-top-left-radius: 15px; border-top-right-radius: 15px; }
         #qr-canvas { margin: 20px auto; display: block; border: 1px solid #eee; border-radius: 8px; }
         #in-app-browser-warning { display: none; position: sticky; top: 0; z-index: 1200; }
-
-        /* --- CSS CHO VALIDATION --- */
-        .form-group {
-            position: relative;
-        }
-        .invalid-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #dc3545;
-            display: none; /* Ẩn mặc định */
-        }
-        .form-control.is-invalid {
-            padding-right: 2.5rem; /* Tạo không gian cho icon */
-            border-color: #dc3545;
-        }
-        .form-control.is-invalid + .invalid-icon {
-            display: block; /* Hiện icon khi có lỗi */
-        }
-        .invalid-feedback {
-            display: none; /* Ẩn feedback mặc định của Bootstrap */
-            width: 100%;
-            margin-top: .25rem;
-            font-size: .875em;
-            color: #dc3545;
-        }
-        .form-control.is-invalid ~ .invalid-feedback {
-            display: block; /* Hiện feedback khi có lỗi */
-        }
+        .form-group { position: relative; }
+        .invalid-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #dc3545; display: none; }
+        .form-control.is-invalid { padding-right: 2.5rem; border-color: #dc3545; }
+        .form-control.is-invalid + .invalid-icon { display: block; }
+        .invalid-feedback { display: none; width: 100%; margin-top: .25rem; font-size: .875em; color: #dc3545; }
+        .form-control.is-invalid ~ .invalid-feedback { display: block; }
     </style>
 </head>
 <body>
@@ -111,7 +87,7 @@
                                     <label for="company" class="form-label"><i class="fas fa-building me-2"></i>Công Ty/Tổ Chức</label>
                                     <input type="text" class="form-control" id="company" placeholder="Tên công ty (không bắt buộc)">
                                 </div>
-                                <button type="submit" class="btn  w-100 py-2 mt-3" style="background-color: #198754; color: white;">
+                                <button type="submit" class="btn w-100 py-2 mt-3" style="background-color: #198754; color: white;">
                                     <i class="fas fa-paper-plane me-2"></i>ĐĂNG KÝ NGAY
                                 </button>
                             </form>
@@ -133,13 +109,12 @@
                             <p class="mb-3">Cảm ơn bạn đã đăng ký! Đây là mã QR của bạn:<br><h4 style="color: red;">(Lưu ý: Vui lòng lưu mã QR code này để check-in vào ngày hội thảo!!!)</br></h4></p>
                             <canvas id="qr-canvas"></canvas>
                             <div id="userInfo" class="mt-3 p-3 bg-light rounded"></div>
-                            <a class="btn  mt-3" style="background-color: #198754; color: white;" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
+                            <a class="btn mt-3" style="background-color: #198754; color: white;" id="saveQrButton" href="#" download="Ma-QR-HoiThao.png" onclick="handleSaveClick()">
                                 <i class="fas fa-download"></i> Lưu QR Code
                             </a>
                             <button class="btn btn-outline-primary mt-3 ms-2" style="background-color: #198754; color: white;" onclick="showPage('register'); document.getElementById('registerForm').reset();">
                                 <i class="fas fa-plus"></i> Đăng Ký Mới
                             </button>
-                            
                         </div>
                     </div>
                 </div>
@@ -156,7 +131,6 @@
                         </div>
                         <div class="card-body text-center">
                             <div id="qr-reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
-                            <div id="scan-result" class="mt-3"></div>
                         </div>
                     </div>
                 </div>
@@ -183,6 +157,27 @@
         </div>
     </div>
 
+    <!-- Modal để hiển thị thông báo lỗi QR -->
+    <div class="modal fade" id="qrErrorModal" tabindex="-1" aria-labelledby="qrErrorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrErrorModalLabel"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Thông Báo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="initiateScanPage()"></button>
+                </div>
+                <div class="modal-body" id="qrErrorModalBody">
+                    <!-- Nội dung lỗi sẽ được chèn vào đây bằng JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="initiateScanPage()">
+                        <i class="fas fa-qrcode me-2"></i>Quét Lại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -194,6 +189,13 @@
         const checkinSound = new Audio('https://cdn.freesound.org/previews/253/253177_4486188-lq.mp3');
         let currentUser = null;
         let html5QrcodeScanner = null;
+        let qrErrorModal = null;
+
+        function showQrErrorModal(message) {
+            const modalBody = document.getElementById('qrErrorModalBody');
+            modalBody.innerHTML = message;
+            qrErrorModal.show();
+        }
 
         function showNotification(message, type = 'info', duration = 5000) {
             const container = document.getElementById('notification-container');
@@ -237,12 +239,10 @@
 
             [nameInput, emailInput, phoneInput].forEach(clearError);
 
-            // 1. Kiểm tra Họ và tên
             if (nameInput.value.trim() === '') {
                 setError(nameInput, 'Vui lòng nhập họ và tên.');
             }
 
-            // 2. Kiểm tra Email (bắt buộc)
             const emailValue = emailInput.value.trim();
             if (emailValue === '') {
                 setError(emailInput, 'Vui lòng nhập địa chỉ email.');
@@ -250,7 +250,6 @@
                 setError(emailInput, 'Vui lòng nhập email hợp lệ.');
             }
 
-            // 3. Kiểm tra Số điện thoại (10-11 số)
             const phoneValue = phoneInput.value.trim();
             const phoneRegex = /^0\d{9,10}$/;
             if (phoneValue === '') {
@@ -276,7 +275,7 @@
             try {
                 const phone = document.getElementById('phone').value.trim();
                 const name = document.getElementById('name').value.trim();
-                const email = document.getElementById('email').value.trim(); // Email giờ là bắt buộc
+                const email = document.getElementById('email').value.trim();
                 const company = document.getElementById('company').value.trim() || null;
 
                 const { data: existingParticipant, error: checkError } = await supabase
@@ -339,7 +338,6 @@
             showPage('success');
         }
 
-        // --- PLATFORM DETECTION & SAVE LOGIC ---
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
@@ -349,24 +347,15 @@
             return /Zalo|FBAN|FBAV|Twitter|Instagram/.test(userAgent);
         }
 
-        // === NEW: Click handler for the save button ===
         function handleSaveClick() {
             if (isIOS()) {
-                // Show a specific, longer notification for iOS users
                 showNotification('Mã QR đã được lưu vào ứng dụng Tệp (Files) trên iPhone của bạn.', 'info', 8000);
             } else {
-                // Standard notification for others
                 showNotification('Đã bắt đầu tải mã QR!', 'info');
             }
-            // The default download action of the <a> tag will proceed after this function.
         }
 
-        // --- QR SCANNING FLOW (Unchanged) ---
         function initiateScanPage() {
-            const scanResultDiv = document.getElementById('scan-result');
-            if (scanResultDiv) {
-                scanResultDiv.innerHTML = '';
-            }
             checkinSound.play().catch(e => {});
             checkinSound.pause();
             checkinSound.currentTime = 0;
@@ -390,8 +379,7 @@
                 if (!qrData.id || !qrData.name) throw new Error("Mã QR không hợp lệ.");
                 processCheckin(qrData);
             } catch (error) {
-                const scanResultDiv = document.getElementById('scan-result');
-                scanResultDiv.innerHTML = `<div class="alert alert-danger">${error.message}</div><button class="btn btn-info mt-2" onclick="initiateScanPage()">Quét Lại</button>`;
+                showQrErrorModal(`<div class="alert alert-danger mb-0">${error.message}</div>`);
             }
         }
 
@@ -402,14 +390,14 @@
         }
 
         async function processCheckin(qrData) {
-            const scanResultDiv = document.getElementById('scan-result');
             try {
                 const { data: participant, error } = await supabase.from('attendees').select('*').eq('id', qrData.id).single();
                 if (error || !participant) {
                     throw new Error("Không tìm thấy thông tin đăng ký cho mã QR này!");
                 }
                 if (participant.checked_in) {
-                    scanResultDiv.innerHTML = `<div class="alert alert-warning"><strong>${participant.name}</strong> đã check-in trước đó!<br>Thời gian: ${new Date(participant.checkin_time).toLocaleString('vi-VN')}</div><button class="btn btn-info mt-2" onclick="initiateScanPage()">Quét Lại</button>`;
+                    const errorMessage = `<div class="alert alert-warning mb-0"><strong>${participant.name}</strong> đã check-in trước đó!<br>Thời gian: ${new Date(participant.checkin_time).toLocaleString('vi-VN')}</div>`;
+                    showQrErrorModal(errorMessage);
                     return;
                 }
                 
@@ -420,10 +408,15 @@
                 checkinSound.play();
                 
                 const checkinInfoDiv = document.getElementById('checkinInfo');
+                const guestTypeDisplay = participant.guest_type === 'VIP'
+                    ? `<strong class="text-danger"><i class="fas fa-star me-2"></i>VIP</strong>`
+                    : (participant.guest_type || 'Thường');
+
                 checkinInfoDiv.innerHTML = `
                     <div class="alert alert-success text-start">
                         <h5 class="text-center"><i class="fas fa-user-check"></i> ${participant.name}</h5>
                         <hr>
+                        <p><strong><i class="fas fa-user-tag me-2"></i>Loại khách:</strong> ${guestTypeDisplay}</p>
                         <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> ${participant.email || 'N/A'}</p>
                         <p><strong><i class="fas fa-phone me-2"></i>Điện thoại:</strong> ${participant.phone}</p>
                         <p><strong><i class="fas fa-building me-2"></i>Công ty:</strong> ${participant.company || 'N/A'}</p>
@@ -438,17 +431,17 @@
                 showPage('checkin-success');
 
             } catch (error) {
-                scanResultDiv.innerHTML = `<div class="alert alert-danger">Lỗi khi check-in: ${error.message}</div><button class="btn btn-info mt-2" onclick="initiateScanPage()">Quét Lại</button>`;
+                showQrErrorModal(`<div class="alert alert-danger mb-0">Lỗi khi check-in: ${error.message}</div>`);
             }
         }
 
-        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Check for in-app browser and show warning if needed
             if (isInAppBrowser()) {
                 document.getElementById('in-app-browser-warning').style.display = 'block';
             }
             
+            qrErrorModal = new bootstrap.Modal(document.getElementById('qrErrorModal'));
+
             showPage('register');
         });
     </script>
