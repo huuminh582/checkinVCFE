@@ -16,7 +16,6 @@
         #admin .list-container { background-color: #fff; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); overflow: hidden; }
         #admin .list-header { background-color: #198754; color: white; padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
         #admin .table thead th { font-weight: 600; }
-        /* CSS MỚI: Giúp dropdown vừa vặn hơn trong bảng */
         .guest-type-select {
             min-width: 120px;
             font-size: 0.875rem;
@@ -29,7 +28,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="index.html"><i class="fas fa-calendar-check"></i> Hội thảo 2024</a>
+            <a class="navbar-brand" href="index.html"><i class="fas fa-calendar-check"></i> Hội thảo VCFE 2025</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -145,7 +144,6 @@
                 participants.forEach((p, index) => {
                     const row = tbody.insertRow();
                     
-                    // --- THAY ĐỔI QUAN TRỌNG BẮT ĐẦU TỪ ĐÂY ---
                     const isVip = p.guest_type === 'VIP';
 
                     row.innerHTML = `
@@ -163,14 +161,12 @@
                         <td>${new Date(p.registered_at).toLocaleString('vi-VN')}</td>
                         <td>${p.checked_in ? `<span class="badge bg-success">Đã Check-in</span>` : `<span class="badge bg-secondary">Chưa Check-in</span>`}</td>
                     `;
-                    // --- KẾT THÚC THAY ĐỔI ---
                 });
             } catch (error) {
                 showNotification(`Lỗi tải dữ liệu: ${error.message}`, 'danger');
             }
         }
         
-        // --- HÀM MỚI ĐỂ CẬP NHẬT LOẠI KHÁCH ---
         async function updateGuestType(selectElement, participantId) {
             const newType = selectElement.value;
             
@@ -185,7 +181,6 @@
                 showNotification('Cập nhật loại khách thành công!', 'success');
             } catch (error) {
                 showNotification(`Lỗi cập nhật: ${error.message}`, 'danger');
-                // Nếu có lỗi, tải lại dữ liệu để đảm bảo giao diện đúng với database
                 loadAdminData();
             }
         }
@@ -197,14 +192,18 @@
             
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
             csvContent += ["STT", "Họ tên", "Email", "Điện thoại", "Công ty", "Loại khách", "Thời gian Đăng ký", "Trạng thái", "Thời gian Check-in"].join(',') + '\r\n';
+            
             participants.forEach((p, index) => {
+                // --- LOGIC ĐÃ ĐƯỢC SỬA Ở ĐÂY ---
+                const guestTypeForExport = p.guest_type === 'VIP' ? 'VIP' : 'Vãng lai';
+
                 const row = [
                     index + 1,
                     `"${p.name.replace(/"/g, '""')}"`,
                     p.email || 'N/A',
                     `="${p.phone}"`,
                     `"${(p.company || 'N/A').replace(/"/g, '""')}"`,
-                    p.guest_type || 'Thường',
+                    guestTypeForExport, // Sử dụng biến đã được xử lý
                     new Date(p.registered_at).toLocaleString('vi-VN'),
                     p.checked_in ? "Đã Check-in" : "Chưa Check-in",
                     p.checkin_time ? new Date(p.checkin_time).toLocaleString('vi-VN') : "N/A"

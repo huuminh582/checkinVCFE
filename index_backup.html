@@ -96,7 +96,7 @@
             </div>
         </div>
         
-        <!-- Trang Check-in Thành Công (GIAO DIỆN MỚI) -->
+        <!-- Trang Check-in Thành Công -->
         <div id="checkin-success" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -108,7 +108,7 @@
                             <div id="checkinInfo">
                                 <!-- Nội dung check-in sẽ được chèn vào đây -->
                             </div>
-                            <button class="btn  w-100 mt-3" style="background-color: #198754; color: white;" onclick="initiateScanPage()">
+                            <button class="btn w-100 mt-3" style="background-color: #198754; color: white;" onclick="initiateScanPage()">
                                 <i class="fas fa-qrcode me-2"></i>Quét Tiếp
                             </button>
                         </div>
@@ -149,6 +149,7 @@
         let currentUser = null;
         let html5QrcodeScanner = null;
         let qrErrorModal = null;
+        let isProcessing = false; // Cờ để chống lỗi quét 2 lần
 
         function showQrErrorModal(message) {
             const modalBody = document.getElementById('qrErrorModalBody');
@@ -315,6 +316,7 @@
         }
 
         function initiateScanPage() {
+            isProcessing = false; // Mở khóa xử lý cho lần quét tiếp theo
             checkinSound.play().catch(e => {});
             checkinSound.pause();
             checkinSound.currentTime = 0;
@@ -330,6 +332,11 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
+            if (isProcessing) {
+                return; // Nếu đang xử lý, bỏ qua các lần quét tiếp theo
+            }
+            isProcessing = true; // Khóa xử lý lại
+
             if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
                 html5QrcodeScanner.pause(true);
             }
@@ -368,38 +375,36 @@
                 
                 const checkinInfoDiv = document.getElementById('checkinInfo');
                 
-                // --- LOGIC MỚI CHO BADGE ---
                 const guestTypeDisplay = (participant.guest_type === 'VIP')
                     ? '<span class="badge rounded-pill bg-danger">VIP</span>'
-                    : '<span class="badge rounded-pill bg-success">Vãng lai</span>';
+                    : '<span class="badge rounded-pill" style="background-color: #198754;">Vãng lai</span>';
 
-                // --- GIAO DIỆN MỚI VỚI ICON TRẮNG TRÊN NỀN TỐI ---
                 checkinInfoDiv.innerHTML = `
-                    <div class="text-black" style="background-color: white; border-radius: .5rem; padding: 1.25rem;">
+                    <div style="background-color: white; border: 1px solid #e9ecef; border-radius: .5rem; padding: 1.25rem;">
                         <div class="text-center mb-3">
-                            <h3 class="fw-light mb-0"><i class="fa-regular fa-circle-user me-2"></i>${participant.name}</h3>
+                            <h3 class="fw-normal mb-0"><i class="fa-regular fa-circle-user me-2 text-dark opacity-75"></i>${participant.name}</h3>
                         </div>
-                        <hr style="opacity: 0.25;">
+                        <hr class="my-3">
                         <div class="text-start">
                             <p class="mb-2">
-                                <i class="fa-regular fa-envelope fa-fw me-2"></i>
+                                <i class="fa-regular fa-envelope fa-fw me-2 text-dark opacity-75"></i>
                                 <strong>Email:</strong> ${participant.email || 'N/A'}
                             </p>
                             <p class="mb-2">
-                                <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>
+                                <i class="fa-solid fa-mobile-screen-button fa-fw me-2 text-dark opacity-75"></i>
                                 <strong>Điện thoại:</strong> ${participant.phone}
                             </p>
                             <p class="mb-2">
-                                <i class="fa-regular fa-building fa-fw me-2"></i>
+                                <i class="fa-regular fa-building fa-fw me-2 text-dark opacity-75"></i>
                                 <strong>Công ty:</strong> ${participant.company || 'N/A'}
                             </p>
                             <p class="mb-0">
-                                <i class="fa-regular fa-user fa-fw me-2"></i>
+                                <i class="fa-regular fa-user fa-fw me-2 text-dark opacity-75"></i>
                                 <strong>Loại khách:</strong> ${guestTypeDisplay}
                             </p>
                         </div>
-                        <hr style="opacity: 0.25;">
-                        <p class="text-center text-white-50 small mb-0">Check-in thành công lúc ${checkinTime.toLocaleString('vi-VN')}</p>
+                        <hr class="my-3">
+                        <p class="text-center text-muted small mb-0">Check-in thành công lúc ${checkinTime.toLocaleString('vi-VN')}</p>
                     </div>
                 `;
                 
